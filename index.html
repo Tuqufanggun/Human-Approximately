@@ -1,0 +1,2867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unclassified Human Objects</title>
+<script>
+  const startOnIntake = !new URLSearchParams(location.search).has('archive');
+  if (startOnIntake) document.documentElement.classList.add('intake-view', 'intake-boot');
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#dedede;color:#282825;font:16px/1.65 system-ui,sans-serif}
+main{position:relative;isolation:isolate;max-width:1800px;margin:auto;min-height:100svh;display:grid;align-items:center;padding:5vw}
+.stone{position:absolute;z-index:-2;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+article{position:relative;z-index:1;width:27%;max-width:340px;padding-top:6vh;pointer-events:none}
+small{font-size:12px;letter-spacing:.16em}
+h1{font:500 clamp(34px,4vw,66px)/1.1 Georgia,serif;margin:.3em 0}
+.detail{min-height:8em;border-block:1px solid #777;padding:14px 0}
+.detail p{margin:0 0 .75em}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;pointer-events:auto}
+button{font:inherit;font-size:14px;color:inherit;border:1px solid #777;background:#e8e8e8;padding:5px 12px;cursor:pointer}
+button[aria-pressed="true"]{background:#292925;color:white}
+model-viewer{position:absolute;left:24%;top:2%;width:41%;height:94%;touch-action:pan-y;filter:grayscale(1) brightness(.64)}
+.map{position:absolute;z-index:-1;left:61%;top:26%;width:28%;height:47%;overflow:visible;pointer-events:none}
+.map path{fill:none;stroke:#292924;stroke-width:2;opacity:.46;filter:drop-shadow(1px 1px 0 #faf8e0)}
+.map circle{fill:#494841;stroke:#292924;stroke-width:1}
+.map circle.active{fill:#ffefad;filter:drop-shadow(0 0 5px #ffe29b)}
+@media(max-width:720px){
+main{display:flex;flex-direction:column;align-items:stretch;padding:0 20px 24px}
+article{order:1;width:100%;max-width:none;padding:0}.detail{min-height:0}
+model-viewer{position:relative;left:auto;top:auto;width:85%;height:clamp(310px,62vw,440px)}
+.stone{height:clamp(310px,62vw,440px);object-fit:cover;object-position:right}
+.map{left:62%;top:65px;width:31%;height:180px}
+}
+h1{font-size:clamp(30px,3vw,46px)}
+h1 span{display:block;font-size:.72em;margin-top:.2em}
+h2{font-size:1em;margin:1.25em 0 .35em}
+article{width:31%;padding-top:0;pointer-events:auto}
+.detail{font-size:.9em}
+.controls{position:absolute;z-index:2;left:61%;bottom:5%;right:4%}
+.controls p{margin:.3em 0}
+.controls nav{margin:.4em 0}
+@media(max-width:720px){article{width:100%;order:2}.controls{position:relative;left:auto;right:auto;bottom:auto;order:1;margin-bottom:24px}}
+model-viewer{filter:grayscale(1) brightness(.82) drop-shadow(1px 0 0 #252521) drop-shadow(-1px 0 0 #252521) drop-shadow(7px 10px 5px #24231e80)}
+model-viewer[data-object="toilet"]{filter:grayscale(1) brightness(1.08) drop-shadow(1px 0 0 #201f1b) drop-shadow(-1px 0 0 #201f1b) drop-shadow(7px 10px 5px #24231e80)}
+.archive-mono{font-family:ui-monospace,monospace;letter-spacing:.04em}
+.archive-serif{font-family:Georgia,serif;font-style:italic}
+.archive-heavy{font-family:Impact,Arial,sans-serif;letter-spacing:.035em}
+main{padding-bottom:110px}
+.archive-title{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);width:52%;text-align:center;pointer-events:none;z-index:2;font-family:Georgia,serif;font-size:clamp(20px,2.9vw,50px)}
+.archive-title span{font-size:.68em}
+.archive-title strong{font-family:Impact,Arial,sans-serif;letter-spacing:.045em}
+.archive-title i{font:italic 1.15em ui-monospace,monospace}
+article{width:30%;max-width:380px}
+.detail{max-height:55vh;overflow:auto;overscroll-behavior:contain;padding:14px 12px 14px 2px;scrollbar-color:#65645b #d5d3cb;font-size:15px;background:#dededec7}
+.detail p:nth-of-type(2){font:17px/1.45 Georgia,serif}
+.detail p:nth-of-type(4){font:13px/1.7 ui-monospace,monospace;letter-spacing:-.035em}
+.detail h2:first-of-type{font:italic 1.45em Georgia,serif;letter-spacing:-.045em}
+.detail h2:last-of-type{font:1.3em Impact,Arial,sans-serif;letter-spacing:.065em}
+.detail p:last-child strong{font-size:1.2em;text-transform:uppercase}
+.archive-layers{position:absolute;z-index:-1;left:8%;top:1%;width:39%;height:83%;pointer-events:none}
+.archive-layers path{fill:#dedede36;stroke:#68686255;stroke-width:2}
+.archive-layers .current{fill:#4c4c48;stroke:#30302e}
+.archive-layers text{fill:#fff;font:12px ui-monospace,monospace}
+model-viewer,model-viewer[data-object="toilet"]{filter:drop-shadow(1px 0 0 #373426) drop-shadow(-1px 0 0 #373426) drop-shadow(8px 12px 7px #26241777)}
+.controls{left:62%;bottom:10%}
+.controls nav{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0;max-width:430px}
+.controls nav::before{content:"";position:absolute;top:50%;left:10%;right:10%;height:3px;background:#242420;transform:rotate(-.6deg);pointer-events:none}
+.controls button{position:relative;display:grid;place-items:center;min-width:0;padding:0;border:0;background:transparent;color:#22221f}
+.controls button svg{width:100%;max-width:62px;height:54px;overflow:visible}
+.controls button:nth-child(even) svg{transform:rotate(14deg) scale(.84)}
+.controls button[aria-pressed="true"]{color:#fff1aa;filter:drop-shadow(1px 1px 0 #25241e) drop-shadow(-1px -1px 0 #25241e) drop-shadow(0 0 7px #fff0a1)}
+.controls button:focus-visible{outline:2px solid #242420}
+@media(max-width:720px){
+main{padding-bottom:24px}
+.archive-title{position:static;transform:none;order:3;width:100%;margin:18px 0}
+article{width:100%;max-width:none}
+.detail{max-height:46vh}
+.archive-layers{top:10px;height:300px;width:45%;left:0}
+.controls{left:auto;bottom:auto}
+}
+main{padding-bottom:5vw}
+article{padding-top:9vh}
+.archive-title{position:static;transform:none;width:auto;text-align:left;margin:.25em 0 .45em;color:#211f1b}
+.archive-title .archive-index{display:block;font:clamp(20px,3vw,49px)/1 Georgia,serif}
+.archive-index b{font: .75em ui-monospace,monospace;letter-spacing:-.09em}
+.archive-title .archive-name{display:block;font:clamp(16px,2vw,33px)/1.15 Georgia,serif;margin-top:.2em}
+.archive-name strong{display:inline-block;font-size:1.22em;transform:rotate(-5deg);letter-spacing:-.045em}
+.archive-title i{display:inline-block;font:italic .85em Courier New,monospace;letter-spacing:-.11em;transform:translateY(.15em) rotate(4deg)}
+.archive-name small{font:.62em ui-monospace,monospace;vertical-align:super}
+.archive-name em{font:italic 1.05em "Snell Roundhand","Brush Script MT",cursive}
+.detail,.detail p:nth-of-type(2),.detail p:nth-of-type(4){font-size:13px;line-height:1.53}
+.detail{max-height:39vh;background:#dededeae}
+.detail h2:first-of-type{font-size:1.24em}
+.detail h2:last-of-type{font-size:1.15em}
+.archive-layers{top:1%;left:5%;width:40%;height:67%;opacity:.72}
+.archive-layers path{stroke:#57564e;stroke-width:1}
+.archive-layers .hatched{fill:url(#section-hatch)}
+.archive-layers .dotted{fill:url(#section-dots)}
+.archive-layers .ruler{fill:none}
+.archive-layers text{fill:#383731;font:9px ui-monospace,monospace;letter-spacing:.045em}
+.controls nav{transform:rotate(-4deg);gap:0}
+.controls nav::before{height:13px;top:44%;left:5%;right:4%;background:#20201d;clip-path:polygon(0 60%,16% 23%,34% 34%,49% 5%,73% 22%,92% 10%,100% 51%,89% 80%,65% 63%,42% 92%,17% 70%);filter:url(#star-grain)}
+.controls button svg{max-width:78px;height:65px;filter:url(#star-grain)}
+.controls button:nth-child(2) svg{transform:translate(-3px,4px) rotate(13deg) scale(.76)}
+.controls button:nth-child(3) svg{transform:translateY(-4px) rotate(-9deg) scale(1.1)}
+.controls button:nth-child(4) svg{transform:translateY(2px) rotate(18deg) scale(.84)}
+.controls button:nth-child(5) svg{transform:translateX(-2px) rotate(-13deg) scale(1.06)}
+@media(max-width:720px){article{padding-top:0}.archive-title{width:100%}.archive-layers{top:0;width:56%;height:270px}.detail{max-height:43vh}}
+main{--stage-height:clamp(720px,100svh,1050px);min-height:var(--stage-height)}
+.stone,.ornament{object-fit:contain}
+.ornament{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ornament-back{z-index:0}
+model-viewer{z-index:1}
+.ornament-front{z-index:0}
+article{z-index:3;width:34%;max-width:490px;padding-top:0;align-self:center}
+.archive-title{background:transparent;margin-bottom:.4em}
+.readings{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.reading{background:#dfddd5f2;border:1px solid #56534c;padding:11px;max-height:30vh;overflow:auto;overscroll-behavior:contain;font:13px/1.48 system-ui,sans-serif;scrollbar-width:thin}
+.reading p{margin:.45em 0}
+.reading h2{font:italic 1.18em Georgia,serif;margin:0}
+.reading:nth-child(2){margin-top:40px;font-family:Georgia,serif}
+.reading:nth-child(3){grid-column:1/-1;width:83%;border-radius:28px;font:12px/1.55 ui-monospace,monospace}
+.reading strong{font:1.3em Impact,sans-serif;text-transform:uppercase}
+.controls{z-index:4;bottom:5%;left:60%;right:5%}
+.controls nav{display:block;position:relative;width:100%;max-width:none;aspect-ratio:1709/610;transform:none;--star-art:url(6be5b481bfce4bd3.png);background:var(--star-art) center/100% 100% no-repeat}
+.controls nav::before{content:none}
+.controls nav::after{content:"";position:absolute;inset:0;pointer-events:none;background:#b6a36a;mask:url(f7c3aea3a5b8db3b.png) center/100% 100% no-repeat, radial-gradient(ellipse 9% 47% at var(--star-center,27.3%) 51%, black 0%, #000d 47%, transparent 100%);mask-composite:intersect;transform-origin:var(--star-center,27.3%) 51%}
+.controls button{position:absolute;z-index:1;left:var(--start);width:calc(var(--end) - var(--start));top:13%;height:74%;border-radius:5px;filter:none!important}
+.controls button:nth-child(1){--start:13%;--end:35.95%}
+.controls button:nth-child(2){--start:35.95%;--end:48.20%}
+.controls button:nth-child(3){--start:48.20%;--end:58.50%}
+.controls button:nth-child(4){--start:58.50%;--end:72.50%}
+.controls button:nth-child(5){--start:72.50%;--end:88%}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.archive-section{position:absolute;z-index:-3;inset:0;width:100%;height:100%;pointer-events:none}
+.archive-section .bedrock{fill:#64615b;opacity:.24}
+.archive-section .bedrock.current,.archive-section .current{fill:#252422;opacity:.91}
+.archive-section .seam{fill:none;stroke:#e5e1d7;stroke-width:1.4;opacity:.6}
+.map{left:61%;top:22%;width:28%;height:48%;z-index:-1}
+.map .blocks{fill:#5e5a50;fill-opacity:.15;stroke:#38362e;stroke-width:.75;opacity:.75}
+.map .roads{stroke-width:1.25}
+.map .arteries{stroke-width:2.65}
+.map .discovery circle{fill:#f1dfa3;stroke:#312c21;stroke-width:1.25;filter:drop-shadow(0 0 3px #fff1b2)}
+@media(max-width:720px){
+main{min-height:100svh}
+article{width:100%;max-width:none}
+.ornament{height:clamp(310px,62vw,440px);object-fit:cover;object-position:right}
+.controls{left:auto;right:auto;bottom:auto;margin:0}
+.readings{gap:7px}
+.reading{max-height:42vh}
+.reading:nth-child(2){margin-top:18px}
+.reading:nth-child(3){width:100%}
+.archive-section{height:460px}
+}
+.readings{display:block;position:relative;height:clamp(345px,58vh,560px);isolation:isolate}
+.reading,.reading:nth-child(2),.reading:nth-child(3){
+position:absolute;display:flex;flex-direction:column;box-sizing:border-box;margin:0;
+max-height:none;overflow:visible;padding:0;border:2px solid #d72532;
+background-color:#dbd8d177;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.91' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='.37'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.reading:nth-child(1){left:0;top:0;width:65%;height:53%;z-index:1}
+.reading:nth-child(2){left:49%;top:19%;width:51%;height:61%;z-index:2}
+.reading:nth-child(3){left:4%;top:49%;width:60%;height:48%;border-radius:49% 52% 46% 48%;z-index:3}
+.reading-scroll{min-height:0;height:100%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9c2632 #eee5db44;padding:12px;outline-offset:-3px;text-shadow:0 1px 2px #fff9}
+.reading:nth-child(1) .reading-scroll{margin-right:24%;margin-bottom:7%}
+.reading:nth-child(2) .reading-scroll{margin-bottom:22%}
+.reading:nth-child(3) .reading-scroll{margin:14% 18% 12% 14%;padding:4px}
+@media(max-width:720px){.readings{height:430px}}
+.map .site-cloud circle{fill:#f2d684;stroke:#3d3224;stroke-width:.5;filter:none;opacity:.92}
+.map .sample-links path{fill:none;stroke:#efcf77;stroke-width:1.15;opacity:.93;filter:drop-shadow(.65px .65px 0 #29241b)}
+.map .sample-links rect{fill:#2f2d27;fill-opacity:.84;stroke:#efcf77;stroke-width:1}
+.map .sample-links circle{fill:#fff2b4;stroke:none;filter:none}
+.map .sample-links text{fill:#f6dc97;font:8px ui-monospace,monospace}
+.osm-base{border:0;filter:grayscale(1) contrast(1.1);mix-blend-mode:multiply;opacity:.88}
+.map-overlay{z-index:0}
+.map-credit,.map-license{position:absolute;z-index:3;top:70%;font:11px/1.4 system-ui,sans-serif;background:#e3dfd2ed;color:#2a2822;padding:2px 4px}
+.map-credit{left:61%}
+.map-license{right:11%}
+@media(max-width:720px){.map-credit,.map-license{top:245px;font-size:9px}.map-credit{left:62%}.map-license{right:7%}}
+.archive-section .strata-contours .contour{fill:none;stroke:#ece9df;stroke-width:1.05;opacity:.49}
+.archive-section .strata-contours .contour-band{stroke-width:5.1;opacity:.25}
+.archive-section .bedrock.current{opacity:.77}
+footer{padding:4px 5vw 9px;text-align:right}
+footer .map-license{position:static;display:inline;padding:0;background:none;font-size:10px}
+.reading,.reading:nth-child(2),.reading:nth-child(3){
+background-color:#dedad294;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='.025 .16 .85 .99'/%3E%3CfeFuncG type='discrete' tableValues='.025 .16 .85 .99'/%3E%3CfeFuncB type='discrete' tableValues='.025 .16 .85 .99'/%3E%3CfeFuncA type='linear' slope='.82'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.reading-scroll{scrollbar-width:none;text-shadow:0 0 3px #eeece1,0 0 5px #eeece1}
+.reading-scroll::-webkit-scrollbar{display:none}
+@media(prefers-reduced-motion:no-preference){
+.reading{animation:reveal-reading .65s cubic-bezier(.2,.65,.25,1) both}
+.reading:nth-child(1){animation-delay:.12s}
+.reading:nth-child(2){animation-delay:.29s}
+.reading:nth-child(3){animation-delay:.46s}
+@keyframes reveal-reading{
+0%{visibility:hidden;transform:translateY(-13px) rotate(-.8deg)}
+1%{visibility:visible}
+72%{transform:translateY(2px) rotate(.18deg)}
+100%{transform:translateY(0) rotate(0)}
+}
+}
+.archive-layers{left:4%;top:2%;width:41%;height:71%;opacity:.82;z-index:-1}
+.archive-layers [data-archive-layer].current{fill:#77766e;stroke:#4f4e48}
+.archive-layers [data-archive-layer="001"]:not(.current){fill:url(#section-hatch)}
+.archive-layers [data-archive-layer="002"]:not(.current),
+.archive-layers [data-archive-layer="004"]:not(.current){fill:url(#section-hatch)}
+.archive-layers [data-archive-layer="003"]:not(.current){fill:url(#section-dots)}
+.etch-defs{position:absolute}
+.etched-map{object-fit:fill;filter:url(#stone-etch);opacity:.91}
+.controls nav::after{background:#c9af69}
+@media(prefers-reduced-motion:no-preference){
+.controls nav[data-pulse="a"]::after{animation:star-settle-a .42s ease-out}
+.controls nav[data-pulse="b"]::after{animation:star-settle-b .42s ease-out}
+@keyframes star-settle-a{0%{opacity:.45}45%{opacity:1;transform:scale(1.065)}100%{transform:scale(1)}}
+@keyframes star-settle-b{0%{opacity:.45}45%{opacity:1;transform:scale(1.065)}100%{transform:scale(1)}}
+}
+@media(max-width:720px){.archive-layers{width:56%;height:270px}}
+body{background-color:#dedede;background-image:linear-gradient(#dededea8,#dededea8),url(d642064cd6f876a4.png);background-repeat:repeat;background-size:auto,130px auto}
+main{padding-inline:6vw}
+article{margin-left:1.6vw}
+.controls{right:6%}
+.map.map-overlay{left:46%;top:16%;width:44%;height:62%}
+.map .sample-links{opacity:.78}
+.discovery-mark{transform-box:fill-box;transform-origin:center}
+.reading,.reading:nth-child(2),.reading:nth-child(3){
+background-color:#4d4d4a53;
+background-image:radial-gradient(ellipse at 46% 44%,#b9b8b48a,transparent 69%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.37 .84' numOctaves='4' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='.67 .15 .10 0 -.04 .12 .58 .15 0 -.05 .13 .20 .68 0 -.07 0 0 0 .81 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+background-blend-mode:screen,normal;
+}
+.reading:nth-child(2){border-radius:3px 25px 7px 14px}
+.reading:nth-child(3){border-radius:53% 46% 51% 44%}
+.reading-scroll{text-shadow:0 1px 2px #f5f1e5,0 0 4px #f5f1e5}
+.controls nav::after{content:none}
+.active-eye{position:absolute;z-index:2;left:var(--star-center,27.3%);top:51%;width:clamp(38px,11%,74px);transform:translate(-50%,-50%);pointer-events:none}
+.floating-notes{position:absolute;z-index:5;right:1.8%;top:27%;width:clamp(36px,5vw,77px);display:block;border-radius:50%}
+.floating-notes svg{display:block;width:100%;height:auto}
+.floating-notes:hover circle,.floating-notes:focus-visible circle{fill:#9c292c}
+.model-scan{position:absolute;z-index:2;left:32%;top:23%;width:25%;height:51%;pointer-events:none;opacity:0;transition:opacity .3s}
+.model-scan.is-ready{opacity:.83}
+.scan-lines{fill:none;stroke:#d6c67f;stroke-width:.62;stroke-dasharray:2.5 2}
+.scan-nodes{fill:#f4e79c;stroke:#3b3423;stroke-width:.7}
+@media(prefers-reduced-motion:no-preference){
+.discovery-mark{animation:find-mark .36s ease-out both;animation-delay:var(--appear)}
+@keyframes find-mark{0%{opacity:0;transform:scale(.3)}66%{opacity:1;transform:scale(1.32)}100%{opacity:1;transform:scale(1)}}
+.floating-notes{animation:notes-drift 9s ease-in-out infinite alternate}
+@keyframes notes-drift{from{transform:translate(0,-11px)}to{transform:translate(-12px,24px)}}
+}
+@media(max-width:720px){
+main{padding-inline:20px}article{margin-left:0}.controls{right:auto}
+.map.map-overlay{left:49%;top:45px;width:44%;height:215px}
+.floating-notes{top:100px;right:1%}
+.model-scan{left:17%;top:61px;width:48%;height:180px}
+}
+.notes-molecules{position:absolute;inset:0;display:block;margin:0;pointer-events:none;z-index:5}
+.notes-dot{position:absolute;left:calc(var(--x) * .48);top:var(--y);width:var(--size);aspect-ratio:1;background:#171716;border-radius:50%;pointer-events:auto}
+.notes-dot:nth-child(1){--x:2.8%;--y:15%;--size:clamp(19px,2vw,34px);--dx:14px;--dy:21px;--speed:14s}
+.notes-dot:nth-child(2){--x:5.3%;--y:33%;--size:clamp(16px,1.55vw,27px);--dx:-18px;--dy:10px;--speed:17s}
+.notes-dot:nth-child(3){--x:1.9%;--y:54%;--size:clamp(22px,2.25vw,38px);--dx:13px;--dy:-22px;--speed:15s}
+.notes-dot:nth-child(4){--x:4.5%;--y:74%;--size:clamp(15px,1.5vw,25px);--dx:-11px;--dy:21px;--speed:19s}
+.notes-dot:nth-child(5){--x:9%;--y:91%;--size:clamp(18px,1.9vw,32px);--dx:22px;--dy:-12px;--speed:16s}
+.notes-dot:hover,.notes-dot:focus-visible{outline:2px solid #171716;outline-offset:4px}
+@media(prefers-reduced-motion:no-preference){
+.notes-dot{animation:molecule-drift var(--speed) ease-in-out infinite alternate}
+.notes-dot:nth-child(even){animation-direction:alternate-reverse}
+@keyframes molecule-drift{0%{transform:translate(0,0)}45%{transform:translate(var(--dx),0)}100%{transform:translate(calc(var(--dx) * -.5),var(--dy))}}
+}
+@media(max-width:720px){
+.stone-art{inset:0 0 auto auto;width:calc(clamp(310px,62vw,440px) * 1.77778);min-width:100%}
+.notes-dot{--x:2%;scale:.7}
+.notes-dot:nth-child(2),.notes-dot:nth-child(4){left:4%}
+.notes-dot:nth-child(5){left:6%}
+}
+.notes-dot:nth-child(1){--x:8%;--y:15%;--speed:117s;--phase:-3s;--a:37%;--b:72%;--c:56%;--d:85%}
+.notes-dot:nth-child(2){--x:69%;--y:12%;--speed:139s;--phase:-41s;--a:71%;--b:33%;--c:80%;--d:18%}
+.notes-dot:nth-child(3){--x:88%;--y:54%;--speed:127s;--phase:-82s;--a:25%;--b:62%;--c:17%;--d:53%}
+.notes-dot:nth-child(4){--x:35%;--y:83%;--speed:149s;--phase:-104s;--a:84%;--b:23%;--c:40%;--d:67%}
+.notes-dot:nth-child(5){--x:49%;--y:36%;--speed:131s;--phase:-60s;--a:50%;--b:89%;--c:67%;--d:29%}
+.scan-anchor{display:block;width:0;height:0;pointer-events:none}
+.model-scan{overflow:visible}
+.scan-lines{stroke-width:1;stroke:#ddcf8a;stroke-dasharray:4 3}
+.active-eye{width:clamp(23px,var(--eye-width,9%),60px)}
+.controls nav::after{content:"";opacity:0;z-index:1;background:#a98e4c}
+.discovery-mark{filter:saturate(1.65) contrast(1.3) drop-shadow(0 0 .75px #70151a)}
+@media(prefers-reduced-motion:no-preference){
+.notes-dot,.notes-dot:nth-child(even){animation:wide-drift var(--speed) var(--phase) linear infinite}
+@keyframes wide-drift{
+0%,100%{left:calc(var(--x) * .48);top:var(--y)}
+20%{left:calc(var(--a) * .48);top:12%}
+42%{left:calc(var(--b) * .48);top:48%}
+66%{left:calc(var(--c) * .48);top:83%}
+84%{left:calc(var(--d) * .48);top:57%}
+}
+.controls nav[data-pulse="a"]::after{animation:star-nudge-a .43s ease-out}
+.controls nav[data-pulse="b"]::after{animation:star-nudge-b .43s ease-out}
+@keyframes star-nudge-a{0%,100%{opacity:0;transform:scale(1)}43%{opacity:.85;transform:scale(1.13)}}
+@keyframes star-nudge-b{0%,100%{opacity:0;transform:scale(1)}43%{opacity:.85;transform:scale(1.13)}}
+}
+.scan-lines{stroke-dasharray:none;stroke:#e5d78b;stroke-width:1.05;stroke-linejoin:round}
+.scan-brackets{stroke-width:1.5}
+.scan-nodes{fill:#f1e6a1;stroke:#393525}
+.scan-lines,.scan-brackets{stroke:#c21e2b;stroke-width:1.35;stroke-dasharray:none}
+.controls nav::after{content:none}
+.discovery-mark{filter:url(#map-red-ink)}
+@media(prefers-reduced-motion:no-preference){
+.discovery-mark{animation:ink-mark .11s ease-out both;animation-delay:var(--appear)}
+@keyframes ink-mark{0%{clip-path:inset(100% 0 0)}100%{clip-path:inset(0)}}
+}
+.model-scan-back{z-index:0;fill:#161616;stroke:#161616;stroke-width:1.7}
+.model-scan-back.is-ready{opacity:1}
+.controls nav[data-nudge]{background:none}
+.controls nav[data-nudge]::before,.controls nav[data-nudge]::after{
+content:"";position:absolute;inset:0;width:auto;height:auto;pointer-events:none;
+background:var(--star-art) center/100% 100% no-repeat;clip-path:none;
+}
+.controls nav[data-nudge]::before{
+transform:none;filter:none;z-index:0;
+mask:radial-gradient(ellipse var(--star-width) 53% at var(--star-center) 50%,transparent 65%,#000 100%);
+}
+.controls nav[data-nudge]::after{
+z-index:0;opacity:1;transform-origin:var(--star-center) 50%;
+mask:radial-gradient(ellipse var(--star-width) 53% at var(--star-center) 50%,#000 65%,transparent 100%);
+}
+.controls nav[data-nudge="a"]::after{animation:star-motion-a .4s cubic-bezier(.24,.65,.32,1)}
+.controls nav[data-nudge="b"]::after{animation:star-motion-b .4s cubic-bezier(.24,.65,.32,1)}
+@keyframes star-motion-a{0%,100%{transform:none}43%{transform:translateY(-2px) scale(1.11) rotate(-2deg)}}
+@keyframes star-motion-b{0%,100%{transform:none}43%{transform:translateY(-2px) scale(1.11) rotate(-2deg)}}
+.model-scan-back{fill:#fff;stroke:#fff}
+.ornament-back{left:-36%;transform:scaleX(-1)}
+.specimen-card{width:34%;max-width:490px;color:#1e1c19}
+.specimen-card h1{font:clamp(28px,3.1vw,55px)/.97 Georgia,serif;margin:.21em 0 .25em}
+.specimen-card h1 strong{font-family:Impact,Arial,sans-serif}
+.specimen-card p{margin:.25em 0}
+.specimen-card h2{font:bold 1em/1.15 ui-monospace,monospace;margin:.3em 0 .5em}
+.specimen-card small,.specimen-id{font:11px/1.5 ui-monospace,monospace;letter-spacing:.06em}
+.specimen-status{font-size:13px;line-height:1.65}
+.specimen-status b{background:#272421;color:#f7f4ea;padding:2px 6px;font:11px ui-monospace,monospace}
+.specimen-columns{display:grid;grid-template-columns:1fr 1fr;gap:3%;width:100%;aspect-ratio:124/102;max-height:290px;margin:.6em 0;background:url(2c4d8eb4bcff2915.png) 8.9% 67.1%/355% auto no-repeat}
+.specimen-columns section{overflow:auto;scrollbar-width:none;padding:10px 9px;font-size:13px;line-height:1.4}
+.specimen-columns section::-webkit-scrollbar{display:none}
+.specimen-columns dl,.specimen-columns dd{margin:0}
+.specimen-columns dt{font-weight:700;margin-top:.22em}
+.specimen-vote,.specimen-note{font-size:12px;line-height:1.35;margin-top:9px}
+.vote-meter{display:flex;align-items:center;gap:10px}
+.vote-meter meter{width:83%;height:17px;accent-color:#c21e2b}
+.vote-meter b{font:1.35em Impact,Arial,sans-serif}
+.specimen-distribution{position:absolute;z-index:2;top:15%;right:7.5%;padding:7px 14px;background:#242220dc;color:#f5e9dc;font:13px/1.1 ui-monospace,monospace;text-align:right;pointer-events:none}
+.specimen-distribution b{font:2.8em Impact,Arial,sans-serif;color:#ed4650;display:block}
+.specimen-distribution small{letter-spacing:0}
+main[data-specimen="school"] .sample-links{display:none}
+@media(max-width:720px){
+.ornament-back{left:-28%;object-position:center}
+.specimen-card{width:100%;max-width:none}
+.specimen-distribution{top:35px;right:6%;font-size:11px}
+}
+main{padding-top:clamp(118px,14vh,166px);touch-action:pan-y}
+.notes-molecules{inset:clamp(12px,2.5vh,28px) auto auto 7%;width:clamp(177px,24vw,365px);aspect-ratio:2.45/1;overflow:visible}
+.tray-letter{position:absolute;left:0;top:-.2em;font:italic clamp(64px,8vw,132px)/1 Georgia,serif;color:#191817}
+.ball-tray{position:absolute;inset:0 0 0 19%;background:url(72d40a254044c59c.png) center/contain no-repeat;pointer-events:auto}
+.ball-tray .notes-dot{appearance:none;padding:0;left:var(--tx);top:var(--ty);width:var(--ts);height:auto;min-width:0;aspect-ratio:1;border:0;background:#181715;scale:none;cursor:grab;touch-action:none}
+.ball-tray .notes-dot:nth-child(1){--tx:22%;--ty:27%;--ts:9%;--dx:17%;--dy:23%;--speed:7.44s;--phase:-1.24s}
+.ball-tray .notes-dot:nth-child(2){--tx:39%;--ty:47%;--ts:9%;--dx:-14%;--dy:-20%;--speed:9.3s;--phase:-4.34s}
+.ball-tray .notes-dot:nth-child(3){--tx:53%;--ty:25%;--ts:9%;--dx:25%;--dy:20%;--speed:8.68s;--phase:-2.48s}
+.ball-tray .notes-dot:nth-child(4){--tx:66%;--ty:50%;--ts:9%;--dx:-22%;--dy:17%;--speed:10.54s;--phase:-6.2s}
+.ball-tray .notes-dot:nth-child(5){--tx:76%;--ty:31%;--ts:9%;--dx:14%;--dy:-23%;--speed:9.92s;--phase:-4.96s}
+.ball-tray .notes-dot.is-dragged{opacity:0;animation-play-state:paused}
+.ball-tray .notes-dot.is-armed{outline:2px solid #c92430;outline-offset:3px;animation-play-state:paused}
+.archive-drop{position:absolute;left:21%;top:55%;width:16%;aspect-ratio:1;border-radius:50%;border:0;padding:0;background:#c92430;pointer-events:auto;transition:transform .18s,background .18s}
+.archive-drop.is-over{transform:scale(1.16);background:#ed323c}
+.dragged-token{position:fixed;z-index:1000;pointer-events:none;background:#181715;border-radius:50%;transform:translate(-50%,-50%)}
+@media(prefers-reduced-motion:no-preference){
+.ball-tray .notes-dot{animation:tray-float var(--speed) var(--phase) ease-in-out infinite alternate}
+@keyframes tray-float{0%{transform:translate(0,0)}55%{transform:translate(var(--dx),var(--dy))}100%{transform:translate(calc(var(--dx) * -.65),calc(var(--dy) * -.7))}}
+}
+@media(max-width:720px){
+main{padding-top:0}
+.notes-molecules{position:relative;inset:auto;order:0;margin:6px 0 10px}
+model-viewer{order:-1}
+}
+.tray-letter{z-index:3;pointer-events:none}
+.ball-tray{left:16%;z-index:1}
+.archive-drop{left:17%;z-index:5}
+.vote-meter meter{appearance:none;background:#1d1c1a;border:0;border-radius:0;overflow:hidden}
+.vote-meter meter::-webkit-meter-bar{background:#1d1c1a;border:0;border-radius:0;box-shadow:none}
+.vote-meter meter::-webkit-meter-optimum-value{background:#c21e2b;border-radius:0}
+.vote-meter meter::-moz-meter-bar{background:#c21e2b;border-radius:0}
+html,body{overscroll-behavior-x:none}
+.vote-meter.is-pending{width:83%;height:13px;background:#262422;margin:.45em 0}
+#specimen-zone:empty{display:none}
+.controls nav{touch-action:pan-y;user-select:none;cursor:grab}
+.controls nav:active{cursor:grabbing}
+.specimen-status b.is-contested{background:#a8202d}
+.specimen-note p,.family-note p{margin:.5em 0}
+.specimen-note h3{font:bold 1em ui-monospace,monospace;margin:.8em 0 .3em}
+.family-note{font-size:12px;line-height:1.4;margin-top:.65em;border-top:1px solid #746e62;padding-top:.5em}
+.family-note h2{margin:0;font:bold 1em ui-monospace,monospace}
+.archive-back{display:inline-block;margin:.4em 0;color:#aa202b;font:12px ui-monospace,monospace}
+.notes-molecules,.dock-preview-tray{--tray-image:url(72d40a254044c59c.png)}
+.notes-molecules{position:absolute;inset:clamp(12px,2.5vh,28px) auto auto 7%;width:clamp(177px,24vw,365px);aspect-ratio:2.45/1;z-index:5;pointer-events:none}
+.tray-letter{position:absolute;left:0;top:-.2em;font:italic clamp(64px,8vw,132px)/1 Georgia,serif;color:#191817;z-index:3}
+.ball-tray{position:absolute;inset:0 0 0 16%;z-index:1;background:var(--tray-image) center/contain no-repeat;display:grid;grid-template-columns:repeat(var(--balls),1fr);align-items:center;justify-items:center;padding:0 10% 0 14%}
+.ball-tray .notes-dot{position:relative;inset:auto;scale:none;width:clamp(17px,1.8vw,26px);aspect-ratio:1;border:0;padding:0;border-radius:50%;background:#181715;cursor:grab;pointer-events:auto;touch-action:none;animation:none}
+.ball-tray .notes-dot.is-dragged{opacity:0;animation-play-state:paused}
+.ball-tray .notes-dot.is-armed{outline:2px solid #c92430;outline-offset:3px;animation-play-state:paused}
+.archive-drop{position:absolute;left:17%;top:55%;width:16%;aspect-ratio:1;border:0;border-radius:50%;padding:0;background:#c92430;color:#fff;font:bold clamp(10px,1.15vw,17px) monospace;z-index:2;pointer-events:auto;cursor:pointer;transition:transform .2s}
+.archive-drop.is-over,.archive-drop.is-swallowing{transform:scale(1.13)}
+.archive-drop.is-rejected{transform:scale(.9)}
+.dragged-token{position:fixed;z-index:1000;pointer-events:none;background:#181715;border-radius:50%;transform:translate(-50%,-50%)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(prefers-reduced-motion:no-preference){
+.ball-tray .notes-dot{animation:archive-bob var(--bob,4.5s) var(--delay,0s) ease-in-out infinite alternate}
+@keyframes archive-bob{from{transform:translate(-2px,-6px)}to{transform:translate(2px,7px)}}
+}
+@media(max-width:720px){main .notes-molecules{position:relative;inset:auto;order:0;margin:6px 0 10px}}
+
+.ball-tray .notes-dot{position:absolute;left:var(--bx);top:var(--by);z-index:1}
+.ball-tray .notes-dot:nth-child(1){--bx:24%;--by:28%;--mx:52%;--my:54%;--ex:67%;--ey:24%}
+.ball-tray .notes-dot:nth-child(2){--bx:43%;--by:52%;--mx:25%;--my:42%;--ex:61%;--ey:29%}
+.ball-tray .notes-dot:nth-child(3){--bx:59%;--by:21%;--mx:68%;--my:52%;--ex:29%;--ey:47%}
+.ball-tray .notes-dot:nth-child(4){--bx:70%;--by:44%;--mx:49%;--my:24%;--ex:31%;--ey:53%}
+.ball-tray .notes-dot:nth-child(5){--bx:34%;--by:41%;--mx:65%;--my:32%;--ex:48%;--ey:55%}
+.ball-tray .notes-dot:hover,.ball-tray .notes-dot:focus-visible{z-index:2}
+.ball-tray .notes-dot:is(:hover,:focus-visible,.is-armed)::after,.dragged-token[data-label]::after{
+content:attr(data-label);position:absolute;left:50%;bottom:100%;transform:translate(-50%,-2px);
+color:#c21e2b;font:bold clamp(11px,1.1vw,17px)/1 ui-monospace,monospace;text-shadow:0 0 2px #e5e1dc;
+}
+@media(prefers-reduced-motion:no-preference){
+.ball-tray .notes-dot{animation:archive-roam calc(var(--bob,4.5s) * 1.7) var(--delay,0s) ease-in-out infinite alternate}
+@keyframes archive-roam{
+0%{left:var(--bx);top:var(--by);transform:translate(0,-3px)}
+48%{left:var(--mx);top:var(--my);transform:translate(-4px,2px)}
+100%{left:var(--ex);top:var(--ey);transform:translate(3px,-2px)}
+}
+}
+
+.ball-tray .notes-dot:is(:hover,:focus-visible,.is-armed)::after,.dragged-token[data-label]::after{
+top:50%;bottom:auto;transform:translate(-50%,-50%);text-shadow:none;color:#ff4554;pointer-events:none
+}
+::highlight(archive-untyped){color:transparent;text-shadow:none}
+::highlight(archive-paper){background-color:#f8f7f2;color:transparent;text-shadow:none}
+.archive-is-typing,.archive-is-typing *{text-shadow:none!important}
+.archive-type-cursor{position:fixed;z-index:100;display:block;pointer-events:none;background:#131313}
+.archive-type-cursor[hidden]{display:none}
+@font-face{font-family:"Archive Grotesk";src:url(742e00cb11d16dfe.woff) format("woff");font-weight:100;font-display:swap}
+@font-face{font-family:"Archive Grotesk";src:url(ef76b7c914a22774.woff) format("woff");font-weight:300;font-display:swap}
+@font-face{font-family:"Archive Grotesk";src:url(e66b3957d688d594.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Archive Grotesk";src:url(e0d12f77b719382d.woff) format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Archive Outata";src:url(9fb7767f967ef62e.otf) format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Archive Revival";src:url(b12f0dd2f7c4c141.otf) format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Archive Onlytrue";src:url(1931923fc37c457e.ttf) format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Archive Onlytrue Small";src:url(61f9fd01f81da1c1.ttf) format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Archive Onlytrue Blob";src:url(f54922ea3a15cbb4.ttf) format("truetype");font-weight:400;font-display:swap}
+.archive-lens-active,.archive-lens-active *{cursor:none!important}
+.archive-lens{position:fixed;width:clamp(176px,17vw,265px);aspect-ratio:1;z-index:90;border-radius:50%;overflow:hidden;pointer-events:none;
+background:#d9d7ceef;border:1px solid #262522;box-shadow:inset 0 0 0 3px #f5f2e69c,0 4px 14px #27221945}
+.archive-lens[hidden]{display:none}
+.archive-lens-surface{position:absolute;inset:0;overflow:hidden;border-radius:inherit;background:inherit;filter:invert(1)}
+.archive-lens::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 18px #302b2250;background:radial-gradient(ellipse at 30% 18%,#fff6,transparent 45%);pointer-events:none}
+.archive-lens-copy{position:absolute!important;top:0!important;left:0!important;right:auto!important;bottom:auto!important;margin:0!important;max-width:none!important;transform-origin:0 0;pointer-events:none}
+.archive-lens-copy small:empty{display:none}
+
+::highlight(archive-painted-type){color:transparent;text-shadow:none}
+.archive-type-paint{position:absolute;inset:0 auto auto 0;z-index:1;pointer-events:none}
+.specimen-columns section{position:relative}
+.archive-type-paint[hidden]{display:none}
+.archive-lens-type{position:absolute;inset:0 auto auto 0;transform-origin:0 0;pointer-events:none}
+.archive-lens-painted .archive-painted-text{color:transparent!important;text-shadow:none!important}
+.archive-lens-painted .specimen-columns :is(p,dd){color:#000;text-shadow:none;-webkit-text-stroke:.2px #000}
+
+.tray-letter{font-size:clamp(78px,9.5vw,157px);top:-.12em}
+.specimen-columns .archive-painted-text{text-shadow:none!important}
+.archive-lens{border:2px solid #bc2732;opacity:0;transform:scale(.77);transition:opacity .16s ease,transform .19s cubic-bezier(.2,.75,.32,1)}
+.archive-lens.is-visible{opacity:1;transform:scale(1)}
+.archive-lens-type{width:100%;height:100%}
+@media(prefers-reduced-motion:reduce){.archive-lens{transition:none}}
+
+.notes-molecules .archive-drop{z-index:6}
+@media(min-width:721px){body{position:relative}footer{position:absolute;left:0;right:0;bottom:0;z-index:4;pointer-events:none}footer a{pointer-events:auto}}
+@font-face{font-family:"Archive Amdal";src:url(5f4274efcaa8dca1.woff2) format("woff2");font-style:normal;font-weight:400;font-display:swap}
+.tray-letter{font-family:"Archive Amdal",sans-serif;font-style:normal;font-weight:400;font-size:clamp(87px,10.2vw,170px);top:-.11em}
+.specimen-distribution{pointer-events:auto}
+.archive-lens-copy .vote-meter meter::-webkit-meter-optimum-value{background:#637baf}
+.archive-lens-copy .vote-meter meter::-moz-meter-bar{background:#637baf}
+.archive-lens-copy{z-index:0!important}
+.archive-lens-type{z-index:2}
+.archive-lens-copy .specimen-status b.is-contested{background:#637baf}
+.archive-lens-copy .specimen-columns{background-color:#fff7;background-blend-mode:screen}
+.archive-drop,.ball-tray .notes-dot[data-label]::after,.dragged-token[data-label]::after{font-family:Arial,sans-serif;font-weight:400;font-variant-numeric:tabular-nums}
+@media(min-width:721px){
+main{
+  --archive-dock-top:clamp(12px,2.5vh,28px);
+  --archive-dock-width:clamp(177px,24vw,365px);
+  --archive-text-gap:clamp(8px,1.15vh,14px);
+  padding-top:calc(var(--archive-dock-top) + var(--archive-dock-width) / 2.45 + var(--archive-text-gap));
+}
+main .notes-molecules{top:var(--archive-dock-top);width:var(--archive-dock-width)}
+main .specimen-card{align-self:start;top:auto}
+}
+model-viewer::part(default-progress-bar){display:none}
+.dock-motion-overlay{position:fixed;inset:0;z-index:1001;pointer-events:auto}
+.dock-motion-part{position:absolute;display:grid;place-items:center;white-space:nowrap}
+.dock-in-motion{visibility:hidden}
+.dock-in-motion .notes-dot{animation-play-state:paused}
+:root:not(.dock-shared-scene) .dock-arriving main > :not(.notes-molecules),.dock-arriving .intake-grid{opacity:0;pointer-events:none}
+:root:not(.dock-shared-scene) .dock-arriving main > :not(.notes-molecules){visibility:hidden}
+@media(prefers-reduced-motion:no-preference){.intake-grid,main>.map,main>.specimen-card,main>.controls,main>.specimen-distribution{transition:opacity .2s ease-out}}
+.dock-pending .notes-molecules,.dock-pending:not(.dock-shared-scene) main > *, .dock-pending .intake-grid{visibility:hidden}
+:root{--dock-transit-ground:#797873}
+.dock-pending:not(.dock-shared-scene),.dock-pending:not(.dock-shared-scene) body,:root:not(.dock-shared-scene) body.dock-arriving,:root:not(.dock-shared-scene) body.dock-leaving{background:var(--dock-transit-ground)}
+.dock-leaving .intake-grid,.dock-arriving .intake-grid{background:transparent;border-color:transparent}
+.dock-leaving .intake-cell,.dock-leaving .intake-information,:root:not(.dock-shared-scene) .dock-leaving main > :not(.notes-molecules,.intake-dock){opacity:0;pointer-events:none}
+.dock-leaving .intake-dock{border-color:transparent}
+.dock-preview-tray{background:var(--tray-image) center/contain no-repeat}
+.dock-preview-portrait{background:#93928f}
+.dock-preview-portrait::before{content:"";position:absolute;inset:3% 5%;border:clamp(2px,.22vw,4px) solid #faf8f3;border-radius:50%;pointer-events:none}
+.dock-preview-ball{background:#181715;border-radius:50%}
+.dock-preview-mouth{background:#c92430;border-radius:50%;color:white;font-family:Arial,sans-serif}
+.dock-preview-mark{color:#191817;font-family:"Archive Amdal",sans-serif;line-height:1}
+@media(prefers-reduced-motion:no-preference){.intake-cell,.intake-information{transition:opacity .14s ease-out}}
+@media(prefers-reduced-motion:no-preference){
+  main>.stone,main>model-viewer{transition:opacity .22s ease-out}
+}
+.dock-shared-scene.dock-pending .archive-scene-piece,
+.dock-shared-scene :is(.dock-arriving,.dock-exchanging,.dock-leaving) .archive-scene-piece{
+  opacity:0;pointer-events:none
+}
+@media(prefers-reduced-motion:no-preference){
+  .archive-scene-piece{transition:opacity .58s cubic-bezier(.25,.65,.25,1)}
+  .dock-exchanging .archive-scene-piece{transition-duration:.46s}
+}
+.intake-grid{position:relative;display:grid;grid-template-columns:repeat(24,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr)) minmax(0,1fr) repeat(6,minmax(0,1fr));height:100svh;padding:0;gap:0;background:#797873;border:2px solid #595751}
+.intake-cell{display:grid;place-items:center;min-width:0;overflow:hidden;background:#181715;color:#dfd9c5;font:clamp(17px,3.6vw,68px)/1 Georgia,serif;border-right:2px solid #595751;border-bottom:2px solid #595751}
+.intake-cell:nth-child(2),.intake-cell:nth-child(7){font-size:clamp(12px,2.7vw,49px)}
+#intake-screen.is-information-open{
+  grid-template-rows:repeat(5,minmax(0,1fr)) minmax(0,3.4fr) repeat(6,minmax(0,1fr))
+}
+.intake-information{
+  position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto;
+  padding:clamp(4px,.65vh,9px) 3%;min-height:0;overflow:hidden;
+  background:#edeae4;color:#222;border-bottom:2px solid #595751;
+  font:clamp(10px,1.05vw,16px)/1.25 Arial,sans-serif
+}
+.intake-information h1,.intake-information p{margin:0}
+.intake-information h1{
+  grid-area:1 / 2;justify-self:end;text-align:right;
+    font-size:clamp(13px,min(2.45vw,4vh),44px);font-weight:700;line-height:1;
+}
+.intake-information .intake-resolved{
+  grid-row:3;grid-column:1 / -1;justify-self:start;font-weight:700;font-size:clamp(9px,.9vw,14px);line-height:1
+}
+.intake-information .intake-introduction{
+  grid-area:2 / 2;align-self:center;contain:inline-size;text-align:left;min-height:0;
+  opacity:0;clip-path:inset(0 100% 0 0);visibility:hidden;
+}
+.intake-information.is-copy-visible .intake-introduction{
+  opacity:1;clip-path:inset(0);visibility:visible
+}
+@media(prefers-reduced-motion:no-preference){
+  #intake-screen{transition:grid-template-rows .48s cubic-bezier(.22,.75,.22,1)}
+  .intake-introduction{
+    transition:opacity .18s ease-out,clip-path .23s ease-in,visibility 0s linear .23s
+  }
+  .intake-information.is-copy-visible .intake-introduction{transition:none}
+}
+.intake-information [data-mixed-type] span{display:inline;font-size:inherit;margin:0}
+.intake-information [data-mixed-type] > span{white-space:nowrap}
+.intake-dock{position:relative;grid-area:1 / 5 / 13 / 13;min-height:430px;border-right:2px solid #595751;background:#93928f}
+.intake-dock .notes-molecules{position:absolute;inset:0;width:auto;aspect-ratio:auto}
+.intake-dock .ball-tray{inset:0}
+.intake-dock .tray-letter{top:auto;left:auto;bottom:.015em;right:1%;font-size:clamp(112px,18vw,295px)}
+.intake-dock .archive-drop{top:auto;left:auto;bottom:5%;right:1%;width:14%;min-width:35px}
+.intake-dock .notes-dot{width:clamp(24px,4.2vw,62px)}
+.intake-dock .notes-dot:nth-child(1){--bx:29%;--by:20%;--mx:39%;--my:33%;--ex:53%;--ey:23%}
+.intake-dock .notes-dot:nth-child(2){--bx:23%;--by:40%;--mx:38%;--my:49%;--ex:26%;--ey:62%}
+.intake-dock .notes-dot:nth-child(3){--bx:62%;--by:37%;--mx:66%;--my:50%;--ex:51%;--ey:44%}
+.intake-dock .notes-dot:nth-child(4){--bx:47%;--by:62%;--mx:52%;--my:72%;--ex:41%;--ey:66%}
+@media(max-width:620px){.intake-grid{height:max(630px,100svh)}.intake-dock .tray-letter{font-size:clamp(60px,18vw,110px)}}
+@media(prefers-reduced-motion:no-preference){.intake-cell,.intake-information{transition:opacity .14s ease-out}}
+.intake-cell{position:relative;isolation:isolate}
+.intake-cell img,.intake-cell svg.intake-black{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.intake-cell .intake-gold{opacity:0}
+.intake-cell:focus-visible{outline:2px solid #ded5b0;outline-offset:-3px}
+.intake-grid{--intake-rule:#93928f;--intake-rule-width:3px;border-color:var(--intake-rule);border-width:var(--intake-rule-width)}
+.intake-cell,.intake-information,.intake-dock{border-color:var(--intake-rule);border-width:var(--intake-rule-width)}
+.intake-panel{display:grid;grid-template-columns:repeat(var(--panel-columns),minmax(0,1fr));grid-template-rows:repeat(var(--panel-rows),minmax(0,1fr));min-width:0;min-height:0}
+.intake-panel-left{grid-area:1 / 1 / 13 / 5;--panel-columns:4;--panel-rows:12}
+.intake-panel-upper{grid-area:1 / 13 / 6 / 25;--panel-columns:12;--panel-rows:5}
+.intake-panel-lower{grid-area:7 / 13 / 13 / 25;--panel-columns:12;--panel-rows:6}
+.intake-cell.is-revealed{background:#000}
+.intake-cell.is-revealed .intake-gold{opacity:1}
+.intake-cell.is-revealed .intake-black{opacity:0}
+.intake-hypotheses{
+  position:absolute;inset:auto 5% 5%;z-index:1;margin:0;padding:0;list-style:none;
+  color:#b2b0ad;font:clamp(8px,1.04cqi,12px)/1.32 ui-monospace,monospace;
+  letter-spacing:.035em;text-align:left;text-shadow:0 1px 3px #000,0 0 3px #000;
+  pointer-events:none;visibility:hidden
+}
+.intake-cell:has(.intake-hypotheses){container-type:inline-size}
+.intake-cell.is-revealed .intake-hypotheses{visibility:visible}
+@media(prefers-reduced-motion:no-preference){
+  .intake-panel{transition:grid-template-columns .42s cubic-bezier(.22,.75,.22,1),grid-template-rows .42s cubic-bezier(.22,.75,.22,1)}
+  .intake-cell{transition:opacity .14s ease-out}
+
+}
+.intake-flicker-band{position:absolute;inset:0;background:#181715;pointer-events:none}
+.intake-cell.is-inspected .intake-flicker-band{display:none}
+@media(prefers-reduced-motion:reduce){.intake-flicker-band{display:none}}
+#intake-screen{position:absolute;inset:0 0 auto;z-index:20;overflow:clip}
+#intake-screen,.intake-dock{background:transparent}
+.intake-ground{
+  position:absolute;inset:0;pointer-events:none;
+  background:#93928f var(--shared-tray-texture) center / cover no-repeat
+}
+#intake-screen .ball-tray,.dock-returning .dock-motion-part.dock-shared-tray{background:none}
+.intake-crossing:not(.dock-returning) .intake-ground{visibility:hidden}
+.dock-returning .intake-panel,.dock-returning .intake-information{visibility:hidden}
+#intake-screen[hidden]{display:none}
+.intake-view body{min-height:0;height:100svh;overflow:clip}
+.intake-view:not(.intake-crossing) body{background-image:none}
+.intake-boot main{visibility:hidden}
+.intake-view:not(.intake-crossing) main{content-visibility:hidden}
+.intake-view:not(.intake-crossing) :is(.specimen-columns,.controls nav){background-image:none}
+.intake-view:not(.intake-crossing) .controls nav::after{mask:none}
+@media(max-width:620px){.intake-view body{height:max(630px,100svh)}}
+.intake-view .archive-scene-piece{opacity:0;pointer-events:none}
+.intake-crossing #intake-screen,.intake-crossing .intake-dock{background:transparent;border-color:transparent}
+:root{--shared-tray-texture:url(a16e494b42c62cd4.jpg)}
+.notes-molecules .ball-tray,.dock-motion-part.dock-shared-tray{
+  background:#93928f var(--shared-tray-texture) center / cover no-repeat
+}
+.tray-oval{
+  position:absolute;inset:7% 4%;border:clamp(2px,.22vw,4px) solid #faf8f3;
+  border-radius:50%;pointer-events:none
+}
+.intake-dock .tray-oval{inset:0}
+.archive-drop,.ball-tray .notes-dot[data-label]::after,.dragged-token[data-label]::after{
+  font-family:"Archive Amdal",sans-serif;font-weight:400
+}
+.archive-drop.is-hungry.is-over{background:#e32c38}
+.archive-liquid-link{position:fixed;top:0;left:0;z-index:999;pointer-events:none}
+.archive-drop.is-fusing,.archive-drop.is-fusing.is-hungry.is-over,.dragged-token.is-fusing{background:transparent}
+@media(prefers-reduced-motion:no-preference){
+  .archive-drop.is-hungry{animation:archive-mouth-want .8s ease-in-out infinite}
+}
+@keyframes archive-mouth-want{
+  0%,100%{transform:scale(1)}
+  45%{transform:scale(.86,1.04)}
+  70%{transform:scale(1.035,.98)}
+}
+</style>
+<script>if(new URLSearchParams(location.search).has('dock')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('dock-pending');</script>
+</head>
+<body>
+<script>
+(() => {
+  if (!document.documentElement.classList.contains('dock-pending')) return;
+  const query = new URLSearchParams(location.search);
+  let source;
+  try { source = JSON.parse(query.get('dock')); } catch { return; }
+  if (!source || typeof source !== 'object') return;
+  if (source.replaces === 1 || source.replaces === 2) {
+    document.documentElement.classList.add('dock-shared-scene');
+  }
+  const preview = document.createElement('div');
+  preview.id = 'dock-load-preview';
+  preview.className = 'dock-motion-overlay';
+  preview.setAttribute('aria-hidden', 'true');
+  for (const key of ['tray', '1', '2', '3', '4', 'mark', 'mouth']) {
+    const rect = source[key];
+    if (!Array.isArray(rect) || rect.length !== 4 ||
+        rect.some(value => !Number.isFinite(value) || Math.abs(value) > 3) ||
+        rect[2] <= 0 || rect[3] <= 0) continue;
+    const layer = document.createElement('div');
+    const kind = /^\d$/.test(key) ? 'ball' : key;
+    layer.className = 'dock-motion-part dock-preview-' + kind;
+    const [left, top, width, height] = rect;
+    layer.style.left = left * 100 + 'vw';
+    layer.style.top = top * 100 + 'vh';
+    layer.style.width = width * 100 + 'vw';
+    layer.style.height = height * 100 + 'vh';
+    if (kind === 'mark') {
+      layer.textContent = '\u2D5D';
+      layer.style.fontSize = height * 100 / 1.5 + 'vh';
+    }
+    if (kind === 'mouth') {
+      layer.textContent = source.label || '';
+      layer.style.fontSize = width * 24 + 'vw';
+    }
+    if (kind === 'tray' && source.fromHome) layer.classList.add('dock-preview-portrait');
+    preview.append(layer);
+  }
+  document.body.append(preview);
+})();
+</script>
+<main>
+<svg class="stone stone-art" viewBox="0 0 2112 1188" aria-hidden="true">
+<defs>
+<image id="stone-original" data-archive-href="610d953f71d2300a.png" width="2112" height="1188"/>
+<mask id="stone-edge" x="0" y="0" width="2112" height="1188" maskUnits="userSpaceOnUse" style="mask-type:alpha"><use href="#stone-original"/></mask>
+<filter id="road-incision" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+<feOffset in="SourceAlpha" dx="1.6" dy="2" result="down"/>
+<feOffset in="SourceAlpha" dx="-1.6" dy="-2" result="up"/>
+<feComposite in="SourceAlpha" in2="down" operator="out" result="upper"/>
+<feComposite in="SourceAlpha" in2="up" operator="out" result="lower"/>
+<feFlood flood-color="#181818" flood-opacity=".73" result="dark"/>
+<feFlood flood-color="#e2e2e2" flood-opacity=".62" result="light"/>
+<feFlood flood-color="#222" flood-opacity=".18" result="interior"/>
+<feComposite in="dark" in2="upper" operator="in" result="shadow"/>
+<feComposite in="light" in2="lower" operator="in" result="rim"/>
+<feComposite in="interior" in2="SourceAlpha" operator="in" result="groove"/>
+<feMerge><feMergeNode in="groove"/><feMergeNode in="shadow"/><feMergeNode in="rim"/></feMerge>
+</filter>
+</defs>
+<use href="#stone-original"/>
+<g mask="url(#stone-edge)"><image data-archive-href="cde81764ae836477.svg" x="704" y="0" width="1330" height="1188" preserveAspectRatio="none" filter="url(#road-incision)"/></g>
+</svg>
+
+
+
+<svg class="map map-overlay" viewBox="0 0 360 285" preserveAspectRatio="none" role="img" aria-label="Archive 001 fictional discovery sites over Manchester"><defs><filter id="map-red-ink" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+<feMorphology in="SourceAlpha" operator="dilate" radius=".33" result="thick"/>
+<feComponentTransfer in="thick" result="solid"><feFuncA type="linear" slope="2"/></feComponentTransfer>
+<feFlood flood-color="#b91f2a" result="ink"/>
+<feComposite in="ink" in2="solid" operator="in"/>
+</filter>
+<symbol id="site-mark" viewBox="0 0 24 24"><image data-archive-href="3fa3212706c7de79.png" width="24" height="24"/></symbol></defs>
+<g class="discovery archive-scene-piece" data-archive-sites="001"><g class="site-cloud"><use class="discovery-mark" href="#site-mark" x="90.64" y="128.94" width="8.52" height="8.52" style="--appear:0.12s"/>
+<use class="discovery-mark" href="#site-mark" x="61.88" y="95.48" width="7.83" height="7.83" style="--appear:1.68s"/>
+<use class="discovery-mark" href="#site-mark" x="80.98" y="123.98" width="8.63" height="8.63" style="--appear:3.24s"/>
+<use class="discovery-mark" href="#site-mark" x="64.67" y="125.77" width="7.86" height="7.86" style="--appear:1.20s"/>
+<use class="discovery-mark" href="#site-mark" x="68.71" y="134.01" width="7.58" height="7.58" style="--appear:2.76s"/>
+<use class="discovery-mark" href="#site-mark" x="138.79" y="164.69" width="7.61" height="7.61" style="--appear:0.72s"/>
+<use class="discovery-mark" href="#site-mark" x="111.92" y="137.02" width="8.16" height="8.16" style="--appear:2.28s"/>
+<use class="discovery-mark" href="#site-mark" x="124.54" y="145.64" width="8.11" height="8.11" style="--appear:0.24s"/>
+<use class="discovery-mark" href="#site-mark" x="134.61" y="151.81" width="8.60" height="8.60" style="--appear:1.80s"/>
+<use class="discovery-mark" href="#site-mark" x="115.23" y="144.73" width="7.75" height="7.75" style="--appear:3.36s"/>
+<use class="discovery-mark" href="#site-mark" x="206.80" y="60.20" width="7.60" height="7.60" style="--appear:1.32s"/>
+<use class="discovery-mark" href="#site-mark" x="187.95" y="44.95" width="8.31" height="8.31" style="--appear:2.88s"/>
+<use class="discovery-mark" href="#site-mark" x="155.80" y="70.00" width="8.41" height="8.41" style="--appear:0.84s"/>
+<use class="discovery-mark" href="#site-mark" x="189.50" y="72.70" width="8.21" height="8.21" style="--appear:2.40s"/>
+<use class="discovery-mark" href="#site-mark" x="195.55" y="175.15" width="8.31" height="8.31" style="--appear:0.36s"/>
+<use class="discovery-mark" href="#site-mark" x="193.17" y="140.27" width="8.27" height="8.27" style="--appear:1.92s"/>
+<use class="discovery-mark" href="#site-mark" x="198.75" y="132.35" width="8.30" height="8.30" style="--appear:3.48s"/>
+<use class="discovery-mark" href="#site-mark" x="257.59" y="142.49" width="7.61" height="7.61" style="--appear:1.44s"/>
+<use class="discovery-mark" href="#site-mark" x="229.35" y="115.55" width="8.30" height="8.30" style="--appear:3.00s"/>
+<use class="discovery-mark" href="#site-mark" x="227.09" y="175.09" width="8.22" height="8.22" style="--appear:0.96s"/>
+<use class="discovery-mark" href="#site-mark" x="266.84" y="196.44" width="7.92" height="7.92" style="--appear:2.52s"/>
+<use class="discovery-mark" href="#site-mark" x="300.23" y="206.33" width="8.72" height="8.72" style="--appear:0.48s"/>
+<use class="discovery-mark" href="#site-mark" x="252.45" y="186.65" width="8.50" height="8.50" style="--appear:2.04s"/>
+<use class="discovery-mark" href="#site-mark" x="287.55" y="222.35" width="8.30" height="8.30" style="--appear:3.60s"/>
+<use class="discovery-mark" href="#site-mark" x="297.60" y="93.70" width="7.80" height="7.80" style="--appear:1.56s"/>
+<use class="discovery-mark" href="#site-mark" x="305.48" y="131.18" width="7.83" height="7.83" style="--appear:3.12s"/>
+<use class="discovery-mark" href="#site-mark" x="319.11" y="86.21" width="7.97" height="7.97" style="--appear:1.08s"/>
+<use class="discovery-mark" href="#site-mark" x="158.47" y="217.17" width="8.46" height="8.46" style="--appear:2.64s"/>
+<use class="discovery-mark" href="#site-mark" x="170.08" y="229.38" width="8.24" height="8.24" style="--appear:0.60s"/>
+<use class="discovery-mark" href="#site-mark" x="198.75" y="247.45" width="8.30" height="8.30" style="--appear:2.16s"/></g></g>
+</svg>
+
+<article id="specimen-record" class="specimen-card archive-scene-piece">
+<header tabindex="0">
+<h1>Body Docking <strong>Structures</strong></h1>
+<p class="specimen-id" id="specimen-id"></p>
+<p class="specimen-status">Current status <b id="specimen-status"></b></p>
+</header>
+<div class="specimen-columns">
+<section tabindex="0" aria-label="Family hypothesis">
+<h2>Family Hypothesis</h2>
+<p>We classify these structures by a repeated physical relationship with the Human body. Each receives a predictable region of the body and holds it in a reproducible configuration.</p>
+<p>The structures differ greatly in form and surrounding context. Humans used similar bodily configurations across otherwise unrelated activities.</p>
+</section>
+<section tabindex="0" aria-label="Specimen record">
+<h2>Specimen Record</h2>
+<dl>
+<dt>Contact</dt><dd id="specimen-contact"></dd>
+<dt>Position</dt><dd id="specimen-position"></dd>
+<dt>Context</dt><dd id="specimen-context"></dd>
+<dt>Interpretation</dt><dd id="specimen-interpretation"></dd>
+</dl>
+</section>
+</div>
+<section class="specimen-vote" tabindex="0" aria-label="Classification vote">
+<h2>Classification Vote</h2>
+<p>Belongs to BODY DOCKING STRUCTURES?</p>
+<div class="vote-meter"><meter id="specimen-meter" min="0" max="100" aria-label="Support"></meter><b id="specimen-support"></b></div>
+<small id="specimen-vote"></small>
+</section>
+<section class="specimen-note" tabindex="0">
+<h2>Research Note</h2>
+<div id="specimen-note"></div>
+</section>
+<section class="family-note">
+<h2>Family Research Note</h2>
+<p>Across these variants, artificial structures completed, positioned or redirected the Human body.</p>
+<p>Humans depended on constructed environments to maintain ordinary bodily states. Their structures also organised how bodies moved, received care and occupied space.</p>
+</section>
+
+</article>
+<aside class="specimen-distribution archive-scene-piece" tabindex="0"><span>Distribution</span><br><small id="specimen-zone"></small><b id="specimen-count"></b><small>Illustrative sites</small></aside>
+
+<div class="controls archive-scene-piece">
+<p id="object-name" class="sr-only" aria-live="polite">BD-01 School Chair</p>
+<nav aria-label="Choose an object">
+<button type="button" data-item="school" aria-pressed="true" aria-label="BD-01 School Chair" title="BD-01 School Chair"></button>
+<button type="button" data-item="stroller" aria-pressed="false" aria-label="BD-02 Stroller" title="BD-02 Stroller"></button>
+<button type="button" data-item="bed" aria-pressed="false" aria-label="BD-03 Hospital Bed" title="BD-03 Hospital Bed"></button>
+<button type="button" data-item="throne" aria-pressed="false" aria-label="BD-04 Throne" title="BD-04 Throne"></button>
+<button type="button" data-item="toilet" aria-pressed="false" aria-label="BD-05 Toilet" title="BD-05 Toilet"></button>
+</nav>
+
+<p id="error" hidden>The model could not load. Check your connection and refresh.</p>
+</div>
+<img class="ornament ornament-back" data-archive-src="420fad2a28221f1c.png" alt="">
+<svg class="model-scan model-scan-back archive-scene-piece" aria-hidden="true"><use href="#tracked-silhouette"/></svg>
+<model-viewer class="archive-scene-piece" id="object" loading="eager" alt="3D model of a stroller" camera-controls disable-pan disable-zoom rotation-per-second="14deg" interaction-prompt="none" camera-orbit="25deg 75deg auto"></model-viewer>
+<svg class="model-scan archive-scene-piece" aria-hidden="true"><g class="scan-lines"><polygon id="tracked-silhouette" class="scan-outline"/><path class="scan-brackets"/></g></svg>
+
+
+<section class="notes-molecules" data-archive="1" data-root="" aria-label="Archive entrance">
+<span class="tray-letter" aria-hidden="true">&#x2D5D;</span>
+<div class="ball-tray" style="--balls:3">
+<button type="button" class="notes-dot" data-archive="2" style="--bob:4.66s;--delay:-1.4s" aria-label="Select archive R-002" data-label="ⵎ"></button>
+<button type="button" class="notes-dot" data-archive="3" style="--bob:5.09s;--delay:-2.1s" aria-label="Select archive R-003" data-label="ⵙ"></button>
+<button type="button" class="notes-dot" data-archive="4" style="--bob:5.52s;--delay:-2.8s" aria-label="Select archive R-004" data-label="ⵟ"></button>
+<span class="tray-oval" aria-hidden="true"></span>
+</div>
+<button type="button" class="archive-drop" aria-label="Release current archive and return to directory" aria-disabled="false">ⵣ</button>
+<p id="archive-drop-status" class="sr-only" aria-live="polite">Drag an archive token into the red circle, or select a token and activate the circle.</p>
+</section>
+
+
+
+
+
+</main>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+<filter id="gallery-silhouette" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  .25 .65 .10 0 0"/>
+<feComponentTransfer><feFuncA type="linear" slope="22" intercept="-.45"/></feComponentTransfer>
+<feComposite in2="SourceGraphic" operator="in"/>
+</filter>
+</defs></svg>
+<section id="intake-screen" class="intake-grid" hidden inert aria-label="Discovered Human objects awaiting classification">
+<div class="intake-ground" aria-hidden="true"></div>
+<div class="intake-panel intake-panel-left">
+<div class="intake-cell" style="grid-area:1 / 1 / 3 / 5" tabindex="0" role="img" aria-label="Unclassified object 01"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-1" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-d3843537-fd39-484e-b873-13b2530e6c72-04-31-20.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-d3843537-fd39-484e-b873-13b2530e6c72-04-32-01.png" width="600" height="600" mask="url(#object-silhouette-1)"/></svg><img class="intake-gold" src="specimen-d3843537-fd39-484e-b873-13b2530e6c72-04-31-20.png" alt=""><ul class="intake-hypotheses"><li>LOW-BODY DOCKING STRUCTURE?</li><li>GROUND-CONTACT SUPPORT?</li><li>OPEN-BOTTOM CONTAINMENT SHELL?</li><li>LOWER-LIMB POSITIONING DEVICE?</li><li>SHORT-DURATION BODY SUPPORT?</li></ul></div>
+<div class="intake-cell" style="grid-area:3 / 1 / 5 / 2" tabindex="0" role="img" aria-label="Unclassified object 02"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-2" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-515b0964-78e2-4af4-a812-b6ab724e9a5b-04-32-39.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-515b0964-78e2-4af4-a812-b6ab724e9a5b-04-33-08.png" width="600" height="600" mask="url(#object-silhouette-2)"/></svg><img class="intake-gold" src="specimen-515b0964-78e2-4af4-a812-b6ab724e9a5b-04-32-39.png" alt=""><ul class="intake-hypotheses"><li>MICRO-BRISTLE CONTACT TOOL?</li><li>ORAL-SURFACE MEDIATOR?</li><li>RESIDUE-REMOVAL STRUCTURE?</li><li>SMALL-CAVITY SURFACE TOOL?</li><li>BIOLOGICAL-SURFACE MAINTENANCE DEVICE?</li><li>CONTACT STRUCTURE FOR INTERNAL BODY SURFACES?</li></ul></div>
+<div class="intake-cell" style="grid-area:3 / 2 / 5 / 5" tabindex="0" role="img" aria-label="Unclassified object 03"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-3" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-e2702dcf-114a-4a33-8d66-1909512f3764-04-33-20.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-e2702dcf-114a-4a33-8d66-1909512f3764-04-33-55.png" width="600" height="600" mask="url(#object-silhouette-3)"/></svg><img class="intake-gold" src="specimen-e2702dcf-114a-4a33-8d66-1909512f3764-04-33-20.png" alt=""><ul class="intake-hypotheses"><li>HAND-HELD SIGNAL CONTROLLER?</li><li>DISTANT-SYSTEM INPUT DEVICE?</li><li>BUTTON-SEQUENCE INTERFACE?</li><li>NON-CONTACT MACHINE MEDIATOR?</li><li>PORTABLE COMMAND SURFACE?</li><li>ENVIRONMENTAL STATE SELECTOR?</li></ul></div>
+<div class="intake-cell" style="grid-area:5 / 1 / 7 / 3" tabindex="0" role="img" aria-label="Unclassified object 04"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-4" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-417e41db-873a-41d5-9303-2561d5b0edfd-04-34-04.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-417e41db-873a-41d5-9303-2561d5b0edfd-04-34-08.png" width="600" height="600" mask="url(#object-silhouette-4)"/></svg><img class="intake-gold" src="specimen-417e41db-873a-41d5-9303-2561d5b0edfd-04-34-04.png" alt=""><ul class="intake-hypotheses"><li>COUNTED MICRO-CONTAINER GRID?</li><li>SEQUENTIAL RELEASE STRUCTURE?</li><li>SMALL-SOLID STORAGE MEMBRANE?</li><li>PORTABLE QUANTITY ORGANISER?</li><li>PRESSURE-ACTIVATED RELEASE SURFACE?</li><li>BODY-CHEMISTRY TRANSFER SYSTEM?</li></ul></div>
+<div class="intake-cell" style="grid-area:5 / 3 / 7 / 5" tabindex="0" role="img" aria-label="Unclassified object 05"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-5" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-860b7d03-3626-4d35-b931-0b5e109d0de7-04-34-26.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-860b7d03-3626-4d35-b931-0b5e109d0de7-04-34-29.png" width="600" height="600" mask="url(#object-silhouette-5)"/></svg><img class="intake-gold" src="specimen-860b7d03-3626-4d35-b931-0b5e109d0de7-04-34-26.png" alt=""><ul class="intake-hypotheses"><li>STANDARDISED METAL UNIT?</li><li>COUNTING DISC?</li><li>PORTABLE REFERENCE OBJECT?</li><li>IDENTIFICATION SURFACE?</li><li>RANDOM-SELECTION DEVICE?</li><li>REPEATABLE EXCHANGE MARKER?</li></ul></div>
+<div class="intake-cell" style="grid-area:7 / 1 / 11 / 5" tabindex="0" role="img" aria-label="Unclassified object 06"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-6" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-ddde3d8e-002a-49fb-ade9-b60bca812dd8-04-34-46.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-ddde3d8e-002a-49fb-ade9-b60bca812dd8-04-34-49.png" width="600" height="600" mask="url(#object-silhouette-6)"/></svg><img class="intake-gold" src="specimen-ddde3d8e-002a-49fb-ade9-b60bca812dd8-04-34-46.png" alt=""><ul class="intake-hypotheses"><li>ROTATIONAL ACCESS OBJECT?</li><li>MECHANICAL ALIGNMENT INSERT?</li><li>PORTABLE SYSTEM-ACTIVATION COMPONENT?</li><li>LOCKING-STRUCTURE INTERFACE?</li><li>SHAPE-MATCHED ENTRY DEVICE?</li><li>SMALL FORCE-TRANSFER TOOL?</li></ul></div>
+<div class="intake-cell" style="grid-area:11 / 1 / 13 / 2" tabindex="0" role="img" aria-label="Unclassified object 07"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-7" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-42eba691-f529-4a97-966f-a9802f7912ac-04-34-56.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-42eba691-f529-4a97-966f-a9802f7912ac-04-34-58.png" width="600" height="600" mask="url(#object-silhouette-7)"/></svg><img class="intake-gold" src="specimen-42eba691-f529-4a97-966f-a9802f7912ac-04-34-56.png" alt=""><ul class="intake-hypotheses"><li>PRESSURISED FLUID ACCESS NODE?</li><li>SUBSURFACE NETWORK INTERFACE?</li><li>GROUND-TO-SURFACE TRANSFER STRUCTURE?</li><li>SYSTEM PRESSURE CONTROL?</li><li>ENVIRONMENTAL LIQUID RELEASE POINT?</li><li>ARCHITECTURAL FLUID ORGAN?</li></ul></div>
+<div class="intake-cell" style="grid-area:11 / 2 / 12 / 5" tabindex="0" role="img" aria-label="Unclassified object 08"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-8" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-5d61b5a5-5a36-4309-9ef2-9ab3373e9bf4-04-35-05.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-5d61b5a5-5a36-4309-9ef2-9ab3373e9bf4-04-35-08.png" width="600" height="600" mask="url(#object-silhouette-8)"/></svg><img class="intake-gold" src="specimen-5d61b5a5-5a36-4309-9ef2-9ab3373e9bf4-04-35-05.png" alt=""><ul class="intake-hypotheses"><li>UPPER-LIMB EXTENSION?</li><li>GROUND-DISPLACEMENT DEVICE?</li><li>MATERIAL-TRANSFER STRUCTURE?</li><li>BODY-TO-TERRAIN MEDIATOR?</li><li>CAVITY-FORMATION TOOL?</li><li>ARTIFICIAL DIGGING LIMB?</li></ul></div>
+<div class="intake-cell" style="grid-area:12 / 2 / 13 / 5" tabindex="0" role="img" aria-label="Unclassified object 09"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-9" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-fb6a3095-1f57-4f9f-b5a6-a9d143752f6b-04-35-16.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-fb6a3095-1f57-4f9f-b5a6-a9d143752f6b-04-35-13.png" width="600" height="600" mask="url(#object-silhouette-9)"/></svg><img class="intake-gold" src="specimen-fb6a3095-1f57-4f9f-b5a6-a9d143752f6b-04-35-16.png" alt=""><ul class="intake-hypotheses"><li>PRESSURISED MATERIAL CONTAINER?</li><li>DIRECTED-FLOW RELEASE STRUCTURE?</li><li>EMERGENCY ENVIRONMENT MODIFIER?</li><li>HEAT-SUPPRESSION DEVICE?</li><li>PORTABLE PRESSURE RESERVOIR?</li><li>MANUAL HAZARD-RESPONSE TOOL?</li></ul></div>
+</div>
+<div class="intake-panel intake-panel-upper">
+<div class="intake-cell" style="grid-area:1 / 1 / 4 / 4" tabindex="0" role="img" aria-label="Unclassified object 10"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-10" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-9f1821fc-cc68-4dc9-ae17-712bae30bfbe-04-35-21.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-9f1821fc-cc68-4dc9-ae17-712bae30bfbe-04-35-24.png" width="600" height="600" mask="url(#object-silhouette-10)"/></svg><img class="intake-gold" src="specimen-9f1821fc-cc68-4dc9-ae17-712bae30bfbe-04-35-21.png" alt=""><ul class="intake-hypotheses"><li>CENTRAL-OBJECT SUPPORT FRAME?</li><li>VERTICAL-AXIS STABILISER?</li><li>SYMMETRICAL FORCE-DISTRIBUTION STRUCTURE?</li><li>OBJECT-POSITIONING CAGE?</li><li>ROTATIONAL RESTRAINT?</li><li>BODY-PART ALIGNMENT DEVICE?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 4 / 2 / 8" tabindex="0" role="img" aria-label="Unclassified object 11"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-11" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-0a67b884-5804-4b9b-b7fc-7c0011e1547c-04-35-31.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-0a67b884-5804-4b9b-b7fc-7c0011e1547c-04-35-36.png" width="600" height="600" mask="url(#object-silhouette-11)"/></svg><img class="intake-gold" src="specimen-0a67b884-5804-4b9b-b7fc-7c0011e1547c-04-35-31.png" alt=""><ul class="intake-hypotheses"><li>BODY-CARRIED CONTAINMENT SHELL?</li><li>DORSAL CONTACT STRUCTURE?</li><li>PORTABLE MATERIAL CHAMBER?</li><li>IMPACT-MEDIATION SURFACE?</li><li>BODY-ATTACHED STORAGE VOLUME?</li><li>MOVEMENT-STABLE CONTAINER?</li></ul></div>
+<div class="intake-cell" style="grid-area:2 / 4 / 4 / 8" tabindex="0" role="img" aria-label="Unclassified object 12"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-12" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-3d9c599a-5401-49ef-bde4-0a73ddaf29cc-04-35-51.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-3d9c599a-5401-49ef-bde4-0a73ddaf29cc-04-35-47.png" width="600" height="600" mask="url(#object-silhouette-12)"/></svg><img class="intake-gold" src="specimen-3d9c599a-5401-49ef-bde4-0a73ddaf29cc-04-35-51.png" alt=""><ul class="intake-hypotheses"><li>MOVEMENT-REDIRECTION STRUCTURE?</li><li>TEMPORARY SPATIAL BOUNDARY?</li><li>MULTI-BODY SEPARATION FRAME?</li><li>ACCESS-MEDIATION STRUCTURE?</li><li>OPEN-SPACE CLOSURE DEVICE?</li><li>COLLECTIVE BODY-GUIDING STRUCTURE?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 8 / 4 / 10" tabindex="0" role="img" aria-label="Unclassified object 13"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-13" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-95251a4f-063f-46a8-bfcf-67962ad440e5-04-35-58.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-95251a4f-063f-46a8-bfcf-67962ad440e5-04-36-00.png" width="600" height="600" mask="url(#object-silhouette-13)"/></svg><img class="intake-gold" src="specimen-95251a4f-063f-46a8-bfcf-67962ad440e5-04-35-58.png" alt=""><ul class="intake-hypotheses"><li>DIGIT-DOCKING LOOP?</li><li>BODY-SURFACE MARKER?</li><li>CIRCUMFERENCE-MATCHING DEVICE?</li><li>PERSISTENT BODY-ASSOCIATION OBJECT?</li><li>SMALL-LIMB RESTRAINT?</li><li>DETACHABLE BODY IDENTIFIER?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 10 / 4 / 13" tabindex="0" role="img" aria-label="Unclassified object 14"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-14" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-cf6c351f-3476-4e8b-8418-9661735781b8-04-36-12.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-cf6c351f-3476-4e8b-8418-9661735781b8-04-36-09.png" width="600" height="600" mask="url(#object-silhouette-14)"/></svg><img class="intake-gold" src="specimen-cf6c351f-3476-4e8b-8418-9661735781b8-04-36-12.png" alt=""><ul class="intake-hypotheses"><li>DIRECTED-AIR GENERATOR?</li><li>BODY-SURFACE DRYING STRUCTURE?</li><li>THERMAL CONTACT WITHOUT TOUCH?</li><li>FIBRE-RECONFIGURATION DEVICE?</li><li>LOCAL ENVIRONMENT MODIFIER?</li><li>UPPER-LIMB AIR EXTENSION?</li></ul></div>
+<div class="intake-cell" style="grid-area:4 / 1 / 6 / 4" tabindex="0" role="img" aria-label="Unclassified object 15"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-15" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-b71cdb1f-32b2-466f-b7b7-1bca36059cf2-04-36-18.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-b71cdb1f-32b2-466f-b7b7-1bca36059cf2-04-36-22.png" width="600" height="600" mask="url(#object-silhouette-15)"/></svg><img class="intake-gold" src="specimen-b71cdb1f-32b2-466f-b7b7-1bca36059cf2-04-36-18.png" alt=""><ul class="intake-hypotheses"><li>CRANIAL SIGNAL INTERFACE?</li><li>ACOUSTIC-MEDIATION STRUCTURE?</li><li>TWO-SIDED HEARING EXTENSION?</li><li>ENVIRONMENTAL-SOUND BOUNDARY?</li><li>PRIVATE SIGNAL FIELD?</li><li>EXTERNAL AUDITORY COMPONENT?</li><li>HEAD-DOCKING SIGNAL DEVICE?</li></ul></div>
+<div class="intake-cell" style="grid-area:4 / 4 / 6 / 8" tabindex="0" role="img" aria-label="Unclassified object 16"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-16" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-9ccc1b5d-45a5-4718-b8cc-c43cbb0f51fc-04-36-47.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-9ccc1b5d-45a5-4718-b8cc-c43cbb0f51fc-04-36-27.png" width="600" height="600" mask="url(#object-silhouette-16)"/></svg><img class="intake-gold" src="specimen-9ccc1b5d-45a5-4718-b8cc-c43cbb0f51fc-04-36-47.png" alt=""><ul class="intake-hypotheses"><li>ABSENT-BODY SUPPORT FRAME?</li><li>DETACHED SURFACE SUSPENSION?</li><li>SHOULDER-PROPORTION STRUCTURE?</li><li>BODY-SHAPE PRESERVATION DEVICE?</li><li>ARTIFICIAL UPPER-BODY SKELETON?</li><li>PERSISTENCE STRUCTURE FOR AN EMPTY BODY-SURFACE?</li></ul></div>
+<div class="intake-cell" style="grid-area:4 / 8 / 6 / 13" tabindex="0" role="img" aria-label="Unclassified object 17"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-17" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-426d8f6d-c92d-4857-8be6-bb2b0d0b1528-04-37-00.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-426d8f6d-c92d-4857-8be6-bb2b0d0b1528-04-37-04.png" width="600" height="600" mask="url(#object-silhouette-17)"/></svg><img class="intake-gold" src="specimen-426d8f6d-c92d-4857-8be6-bb2b0d0b1528-04-37-00.png" alt=""><ul class="intake-hypotheses"><li>LAYERED SYMBOL STORAGE?</li><li>PORTABLE MEMORY STRUCTURE?</li><li>STACKABLE INFORMATION SURFACE?</li><li>VISUAL-SIGNAL ARCHIVE?</li><li>EXTERNAL HUMAN MEMORY?</li></ul></div>
+</div>
+<div class="intake-panel intake-panel-lower">
+<div class="intake-cell" style="grid-area:1 / 1 / 5 / 3" tabindex="0" role="img" aria-label="Unclassified object 18"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-18" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-d0145de0-784c-46ae-ac4d-23da94880367-04-37-18.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-d0145de0-784c-46ae-ac4d-23da94880367-04-37-13.png" width="600" height="600" mask="url(#object-silhouette-18)"/></svg><img class="intake-gold" src="specimen-d0145de0-784c-46ae-ac4d-23da94880367-04-37-18.png" alt=""><ul class="intake-hypotheses"><li>PORTABLE MACHINE-RECOGNITION TOKEN?</li><li>ACCESS-MEDIATION SURFACE?</li><li>CODED CONTACT INTERFACE?</li><li>IDENTITY-SUBSTITUTION OBJECT?</li><li>SYSTEM-STATE TRANSFER DEVICE?</li><li>PORTABLE PERMISSION SIGNAL?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 3 / 5 / 6" tabindex="0" role="img" aria-label="Unclassified object 19"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-19" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-52542930-38ca-42d5-84a7-e280d657042f-04-37-25.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-52542930-38ca-42d5-84a7-e280d657042f-04-37-28.png" width="600" height="600" mask="url(#object-silhouette-19)"/></svg><img class="intake-gold" src="specimen-52542930-38ca-42d5-84a7-e280d657042f-04-37-25.png" alt=""><ul class="intake-hypotheses"><li>LIQUID-TRANSFER VESSEL?</li><li>MOUTH-DOCKING CONTAINER?</li><li>HAND-TO-LIQUID MEDIATOR?</li><li>MATERIAL-MEASUREMENT CHAMBER?</li><li>SMALL-OBJECT CONTAINMENT?</li><li>ACOUSTIC RESONANCE CHAMBER?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 6 / 5 / 10" tabindex="0" role="img" aria-label="Unclassified object 20"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-20" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-ff9f6c18-068b-4856-a4b9-e7a08ae8c052-04-37-38.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-ff9f6c18-068b-4856-a4b9-e7a08ae8c052-04-37-35.png" width="600" height="600" mask="url(#object-silhouette-20)"/></svg><img class="intake-gold" src="specimen-ff9f6c18-068b-4856-a4b9-e7a08ae8c052-04-37-38.png" alt=""><ul class="intake-hypotheses"><li>SURFACE-FASTENING DISC?</li><li>MULTI-POINT THREAD INTERFACE?</li><li>FLEXIBLE-MATERIAL CONNECTOR?</li><li>DETACHABLE SURFACE JOINER?</li><li>BODY-COVERING CLOSURE COMPONENT?</li><li>SMALL ROTATIONAL LOCKING FORM?</li><li>REPEATED GARMENT-SURFACE ANCHOR?</li></ul></div>
+<div class="intake-cell" style="grid-area:1 / 10 / 5 / 13" tabindex="0" role="img" aria-label="Unclassified object 21"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-21" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-8b157784-cedf-43ac-b65d-329b01bec59e-04-37-44.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-8b157784-cedf-43ac-b65d-329b01bec59e-04-37-47.png" width="600" height="600" mask="url(#object-silhouette-21)"/></svg><img class="intake-gold" src="specimen-8b157784-cedf-43ac-b65d-329b01bec59e-04-37-44.png" alt=""><ul class="intake-hypotheses"><li>PERFORATED CONTAINMENT VESSEL?</li><li>MATERIAL-SEPARATION STRUCTURE?</li><li>AIR-EXPOSED STORAGE?</li><li>SMALL-OBJECT COLLECTION CHAMBER?</li><li>DISCARD ACCUMULATION STRUCTURE?</li><li>TEMPORARY MATERIAL FILTER?</li></ul></div>
+<div class="intake-cell" style="grid-area:5 / 1 / 7 / 4" tabindex="0" role="img" aria-label="Unclassified object 22"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-22" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-4f58cecd-7a2f-4867-96a8-a73054ed4830-04-38-04.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-4f58cecd-7a2f-4867-96a8-a73054ed4830-04-38-00.png" width="600" height="600" mask="url(#object-silhouette-22)"/></svg><img class="intake-gold" src="specimen-4f58cecd-7a2f-4867-96a8-a73054ed4830-04-38-04.png" alt=""><ul class="intake-hypotheses"><li>MANUAL INPUT SURFACE?</li><li>SEQUENCE-SELECTION DEVICE?</li><li>HUMAN-TO-SYSTEM CONTACT POINT?</li><li>NUMBER-SIGNAL INTERFACE?</li><li>ACCESS-MEDIATION STRUCTURE?</li><li>CODE TRANSFER DEVICE?</li></ul></div>
+<div class="intake-cell" style="grid-area:5 / 4 / 7 / 8" tabindex="0" role="img" aria-label="Unclassified object 23"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-23" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-0df2e46d-54af-4577-88d4-20397935031c-04-38-19.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-0df2e46d-54af-4577-88d4-20397935031c-04-38-22.png" width="600" height="600" mask="url(#object-silhouette-23)"/></svg><img class="intake-gold" src="specimen-0df2e46d-54af-4577-88d4-20397935031c-04-38-19.png" alt=""><ul class="intake-hypotheses"><li>NON-HUMAN FORM REPLICA?</li><li>FLOATING SIGNAL FORM?</li><li>ACOUSTIC RESPONSE OBJECT?</li><li>SMALL-BODY SUBSTITUTE?</li><li>ENVIRONMENTAL TEST FORM?</li><li>DETACHED PRESENCE OF ANOTHER SPECIES?</li></ul></div>
+<div class="intake-cell" style="grid-area:5 / 8 / 7 / 13" tabindex="0" role="img" aria-label="Unclassified object 24"><svg class="intake-black" viewBox="0 0 600 600" aria-hidden="true"><defs><mask id="object-silhouette-24" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" style="mask-type:alpha"><image href="specimen-4b05e7c0-08cc-4a45-83d1-74e93f9024a0-04-38-34.png" width="600" height="600" filter="url(#gallery-silhouette)"/></mask></defs><image href="specimen-4b05e7c0-08cc-4a45-83d1-74e93f9024a0-04-38-32.png" width="600" height="600" mask="url(#object-silhouette-24)"/></svg><img class="intake-gold" src="specimen-4b05e7c0-08cc-4a45-83d1-74e93f9024a0-04-38-34.png" alt=""><ul class="intake-hypotheses"><li>GROUND-POSITION SIGNAL?</li><li>MOVEMENT-REDIRECTION MARKER?</li><li>TEMPORARY SPATIAL BOUNDARY?</li><li>HIGH-VISIBILITY LOCATION MARKER?</li><li>STACKABLE SIGNAL STRUCTURE?</li><li>SMALL-BODY COVER?</li></ul></div>
+</div>
+<section class="intake-information" style="grid-area:6 / 13 / 7 / 25" aria-labelledby="intake-title" tabindex="0">
+  <h1 id="intake-title" data-mixed-type>UNRESOLVED FINDINGS</h1>
+  <p class="intake-introduction" aria-hidden="true">These specimens have been recovered and recorded, but no interpretation has yet reached classification consensus. Current function proposals remain provisional. Hover over a specimen to view current hypotheses.</p>
+  <p class="intake-resolved"><span aria-hidden="true">←</span> <span data-mixed-type>RESOLVED CASES</span></p>
+</section>
+<div class="intake-dock"></div>
+</section>
+
+<script>
+const previewArchives = {1:{"centers":[27.7,44.2,52.2,64.8,80.2],"vote":"Belongs to BODY DOCKING STRUCTURES?","family":["Across these variants, artificial structures completed, positioned or redirected the Human body.","Humans depended on constructed environments to maintain ordinary bodily states. Their structures also organised how bodies moved, received care and occupied space."],"prefix":"BD-","buttons":"\n<button type=\"button\" data-item=\"school\" aria-pressed=\"true\" aria-label=\"BD-01 School Chair\" title=\"BD-01 School Chair\"></button>\n<button type=\"button\" data-item=\"stroller\" aria-pressed=\"false\" aria-label=\"BD-02 Stroller\" title=\"BD-02 Stroller\"></button>\n<button type=\"button\" data-item=\"bed\" aria-pressed=\"false\" aria-label=\"BD-03 Hospital Bed\" title=\"BD-03 Hospital Bed\"></button>\n<button type=\"button\" data-item=\"throne\" aria-pressed=\"false\" aria-label=\"BD-04 Throne\" title=\"BD-04 Throne\"></button>\n<button type=\"button\" data-item=\"toilet\" aria-pressed=\"false\" aria-label=\"BD-05 Toilet\" title=\"BD-05 Toilet\"></button>\n","targets":[["13%","35.95%"],["35.95%","48.20%"],["48.20%","58.50%"],["58.50%","72.50%"],["72.50%","88%"]],"stars":"url(6be5b481bfce4bd3.png)","widths":[12,8,6,12,10],"heading":"Body Docking ","title":"Previous Research | Archive 001","hypothesis":["We classify these structures by a repeated physical relationship with the Human body. Each receives a predictable region of the body and holds it in a reproducible configuration.","The structures differ greatly in form and surrounding context. Humans used similar bodily configurations across otherwise unrelated activities."],"items":[
+  { key: 'school', name: 'School Chair', src: '9e2aa17c61628af2.glb' },
+  { key: 'stroller', name: 'Stroller', src: '7ac64b764c0bb108.glb' },
+  { key: 'bed', name: 'Hospital Bed', src: '34fbd97ff1f0afea.glb' },
+  { key: 'throne', name: 'Throne', src: 'bb6e326261bc5362.glb' },
+  { key: 'toilet', name: 'Toilet', src: '7fd2fc4a13aad110.glb' },
+],"records":{
+  school: {
+    configuration: 'UPRIGHT CONFIGURATION', zone: 'S-01 / Zone 03', sites: 30,
+    status: 'ACCEPTED VARIANT', vote: [96, 1, 3],
+    contact: 'Lower torso / rear body',
+    position: 'Upper body remains vertical while the lower body forms a repeated folded configuration',
+    context: 'Large numbers of near-identical specimens were recovered from the same enclosed areas. Many were recovered in repeated directional arrangements.',
+    interpretation: 'A standardised docking structure capable of placing multiple Human bodies into similar configurations.',
+    note: [
+      'Humans used artificial structures to standardise the posture of multiple bodies during collective activity.',
+    ],
+  },
+  stroller: {
+    configuration: 'SMALL-BODY MOBILE CONFIGURATION', sites: 14,
+    status: 'ACCEPTED VARIANT', vote: [86, 6, 8],
+    contact: 'Rear body / lower torso / lateral body surfaces',
+    position: 'A Human-shaped body of unusually small scale can be contained within the structure while remaining supported above the ground.',
+    context: 'The structure includes rotating ground-contact components and an elevated grip area positioned beyond the reach of the contained body. Surviving records occasionally show a larger Human-shaped body remaining outside the structure during movement.',
+    interpretation: 'A mobile docking structure designed for a Human-shaped body substantially smaller than the majority of recovered Human remains.',
+    note: [
+      'Humans used mobile docking structures to transport small-bodied Humans. A larger Human supplied movement while the smaller body remained supported.',
+    ],
+  },
+  bed: {
+    configuration: 'EXTENDED HORIZONTAL CONFIGURATION', sites: 6,
+    status: 'ACCEPTED VARIANT', vote: [91, 4, 5],
+    contact: 'A large proportion of the rear body surface',
+    position: 'The body is supported horizontally, with several adjustable regions allowing partial changes in angle.',
+    context: 'Recovered alongside multiple devices positioned within close reach of the supported body. Repeated traces indicate frequent approach by other Humans.',
+    interpretation: 'A prolonged docking structure that keeps a Human body accessible while limiting major changes in position.',
+    note: [
+      'Human bodily dependence produced concentrated attention and intervention from surrounding Humans.',
+    ],
+  },
+  throne: {
+    configuration: 'ELEVATED ORNAMENTAL CONFIGURATION', sites: 1,
+    status: 'ACCEPTED VARIANT', vote: [76, 15, 9],
+    contact: 'Lower torso / rear body / upper limbs',
+    position: 'Upright; frequently elevated relative to surrounding Human positions',
+    context: 'Rarely recovered. Specimens contain unusually dense ornamentation and are often positioned where surrounding bodies or similar structures converge toward them.',
+    interpretation: 'A specialised docking structure that produces an unusually central spatial position for its occupant.',
+    note: [
+      'Spatial importance was partly produced by the docking structure itself; occupying an elevated ornamental configuration increased the occupant’s centrality within surrounding Human groups.',
+    ],
+  },
+  toilet: {
+    configuration: 'WASTE-CONNECTED CONFIGURATION', sites: 20,
+    status: 'CONTESTED VARIANT', vote: [63, 25, 12],
+    contact: 'Lower torso / upper legs',
+    position: 'A seated body configuration closely resembling several other members of this family',
+    context: 'The structure is permanently connected to a larger material-transfer system. Biological residues are concentrated around an opening beneath the primary body-contact area.',
+    interpretation: 'A docking structure connecting a temporarily stationary Human body directly to built material-transfer infrastructure.',
+    note: [
+      'Humans integrated biological waste transfer into their constructed environments. During use, the body and the built system formed a single transfer pathway.',
+    ],
+  },
+}},2:{"targets":[["22%","41.40%"],["41.40%","60.45%"],["60.45%","83%"]],"buttons":"\n<button type=\"button\" data-item=\"shoe\" aria-pressed=\"true\" aria-label=\"CM-01 Footwear\" title=\"CM-01 Footwear\"></button>\n<button type=\"button\" data-item=\"glove\" aria-pressed=\"false\" aria-label=\"CM-02 Glove\" title=\"CM-02 Glove\"></button>\n<button type=\"button\" data-item=\"umbrella\" aria-pressed=\"false\" aria-label=\"CM-03 Umbrella\" title=\"CM-03 Umbrella\"></button>\n","family":["Across these variants, manufactured surfaces received contact that would otherwise have reached the Human body.","Humans depended on manufactured intermediary surfaces when moving through, manipulating or encountering their environment."],"vote":"Belongs to CONTACT-MEDIATION STRUCTURES?","prefix":"CM-","centers":[32.5,50.3,70.6],"hypothesis":["We classify these structures by a repeated physical relationship between the Human body and its surrounding environment. In each case, a manufactured surface receives environmental contact before, or instead of, the biological body.","The structures differ greatly in scale and proximity to the body. Across these configurations, artificial surfaces mediated Human contact with the environment."],"title":"R-002 | Contact-Mediation Structures","heading":"Contact-Mediation ","widths":[11,9,12],"stars":"url(4492bf0af7dd868c.png)","items":[
+  { key: 'shoe', name: 'Footwear', src: 'b73a7eab623131bf.glb' },
+  { key: 'glove', name: 'Glove', src: 'af236a456a2f44e9.glb' },
+  { key: 'umbrella', name: 'Umbrella', src: 'befde4b5a3d9158a.glb' },
+],"records":{
+  shoe: {
+    configuration: 'GROUND-CONTACT SHELL CONFIGURATION', sites: 24,
+    status: 'ACCEPTED VARIANT', vote: [95, 2, 3],
+    contact: 'Distal lower limb',
+    position: 'The body part is inserted into an enclosed cavity closely corresponding to its external form.',
+    context: 'Repeated compression traces occur within the cavity, while concentrated abrasion is found on one external surface furthest from the enclosed body part.',
+    interpretation: 'An artificial contact surface positioned between the Human lower limb and the terrain beneath it.',
+    note: [
+      'Direct contact between the Human lower limb and ordinary terrain was not the standard condition of Human locomotion.',
+    ],
+  },
+  glove: {
+    configuration: 'MANIPULATION MEMBRANE CONFIGURATION', sites: 12,
+    status: 'ACCEPTED VARIANT', vote: [92, 3, 5],
+    contact: 'Distal upper limb and terminal digits',
+    position: 'A thin flexible membrane closely reproduces the external form of the enclosed body part while allowing the individual digits to remain independently mobile.',
+    context: 'Recovered specimens frequently preserve different residues on their inner and outer surfaces. The membrane itself shows little structural separation between the Human body and the contacted material.',
+    interpretation: 'A thin artificial contact layer that allows the Human upper limb to manipulate surrounding materials without becoming the primary surface of contact.',
+    note: [
+      'Human manipulation depended on controlled contact rather than unrestricted biological contact with surrounding materials.',
+    ],
+  },
+  umbrella: {
+    configuration: 'REMOTE INTERCEPTION CONFIGURATION', sites: 9,
+    status: 'CONTESTED VARIANT', vote: [74, 17, 9],
+    contact: 'One upper limb at a narrow grip point',
+    position: 'Most of the structure remains physically separated from the body and can expand into a broad surface beyond it.',
+    context: 'Repeated contact wear is concentrated at the grip. The larger external surface shows traces of repeated exposure to moisture and other environmental deposits.',
+    interpretation: 'A movable artificial surface capable of intercepting environmental material before it reaches the Human body.',
+    note: [
+      'Human contact mediation extended beyond the biological body, allowing artificial surfaces to intercept the environment at a distance.',
+    ],
+  },
+}},3:{"centers":[28.1,45.2,62.6,78.5],"prefix":"PS-","family":["Human presence was not confined to a single biological body.","Humans repeatedly separated visible form, sound, movement and bodily configuration from biological matter and transferred these components into artificial carriers.","An individual Human could therefore remain distributed across multiple non-biological structures, with different components of its presence persisting in different material forms.","The biological body was one location of Human presence, but not its only one."],"vote":"Belongs to PERSISTENCE STRUCTURES?","buttons":"\n<button type=\"button\" data-item=\"photo\" aria-pressed=\"true\" aria-label=\"PS-01 Polaroid Photograph\" title=\"PS-01 Polaroid Photograph\"></button>\n<button type=\"button\" data-item=\"record\" aria-pressed=\"false\" aria-label=\"PS-02 Vinyl Record\" title=\"PS-02 Vinyl Record\"></button>\n<button type=\"button\" data-item=\"phone\" aria-pressed=\"false\" aria-label=\"PS-03 Mobile Phone\" title=\"PS-03 Mobile Phone\"></button>\n<button type=\"button\" data-item=\"mannequin\" aria-pressed=\"false\" aria-label=\"PS-04 Mannequin\" title=\"PS-04 Mannequin\"></button>\n","targets":[["19%","36.65%"],["36.65%","53.90%"],["53.90%","70.55%"],["70.55%","87%"]],"stars":"url(e7f5725c22604795.png)","widths":[8,12,8,9],"heading":"Persistence ","title":"R-003 | Persistence Structures","hypothesis":["We classify these structures by their ability to preserve or reproduce components of Human presence independently of the biological body.","Across these variants, visible form, sound, movement and bodily configuration are separated from biological matter and maintained within artificial carriers."],"items":[{"name":"Polaroid Photograph","src":"a10c6515390482f5.glb","key":"photo"},{"key":"record","name":"Vinyl Record","src":"8f61ac51c5059732.glb"},{"key":"phone","name":"Mobile Phone","src":"33bd3dd456f2f3a0.glb"},{"src":"ada028413ff4c003.glb","name":"Mannequin","key":"mannequin"}],"records":{
+   "mannequin" : {
+      "configuration" : "VOLUMETRIC BODY CONFIGURATION",
+      "contact" : "No biological contact is required for the Human-shaped structure to maintain its form.",
+      "context" : "Recovered specimens contain no corresponding biological organs or internal anatomy. Their external surfaces were repeatedly altered while the underlying Human-shaped volume remained stable.",
+      "interpretation" : "A persistence structure that maintains Human bodily presence in three-dimensional space without biological material.",
+      "note" : [
+         "Humans reproduced bodily presence independently of living tissue, demonstrating that recognisable Human form was not restricted to biological matter.",
+         "Three-dimensional bodily configuration functioned as another detachable component of Human presence."
+      ],
+      "position" : "The structure reproduces the approximate scale, orientation and external geometry of an upright Human body.",
+      "sites" : 6,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         79,
+         14,
+         7
+      ]
+   },
+   "phone" : {
+      "configuration" : "PORTABLE MULTI-PRESENCE CONFIGURATION",
+      "contact" : "Repeated concentrated contact occurs across one planar surface and along the outer edges.",
+      "context" : "Recovered internal material contains numerous Human faces, voices and movement sequences. Multiple individuals, including repeated appearances of the same Human form at different moments, coexist within a single specimen.",
+      "interpretation" : "A portable persistence structure capable of containing and repeatedly reproducing multiple Human presences within one artificial carrier.",
+      "note" : [
+         "Humans routinely carried multiple absent Humans alongside their own biological bodies.",
+         "A single Human could therefore move through its environment accompanied by accumulated fragments of other individuals, as well as earlier versions of its own visible and acoustic presence."
+      ],
+      "position" : "The structure is small enough to remain closely associated with a moving Human body.",
+      "sites" : 30,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         93,
+         3,
+         4
+      ]
+   },
+   "photo" : {
+      "configuration" : "PLANAR VISUAL CONFIGURATION",
+      "contact" : "No direct bodily contact is required for the preserved Human form to remain observable.",
+      "context" : "Recovered specimens repeatedly contain recognisable Human faces and bodies. Matching Human forms occur across separate objects and locations despite the corresponding biological bodies being absent.",
+      "interpretation" : "A persistence structure that separates the visible component of a Human from the biological body and maintains it on a stable surface.",
+      "note" : [
+         "Humans transferred visible components of themselves into artificial surfaces, allowing bodily appearance to remain present without the biological body.",
+         "Human presence therefore extended beyond physical occupation of a location; a Human could continue to occupy visual space after bodily absence."
+      ],
+      "position" : "Human visual form is compressed onto a thin planar surface at a scale independent of the original body.",
+      "sites" : 23,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         97,
+         1,
+         2
+      ]
+   },
+   "record" : {
+      "configuration" : "ENCODED LATENT CONFIGURATION",
+      "contact" : "No Human-shaped contact region is present.",
+      "context" : "The object contains no directly visible Human form. When processed through compatible reconstructed machinery, it produces Human voices, visible bodies and sequences of Human movement.",
+      "interpretation" : "A persistence structure that converts Human-associated components into an encoded state and restores them through external machinery.",
+      "note" : [
+         "Humans transferred components of their presence into states that no longer resembled the biological body and were inaccessible to unaided biological perception.",
+         "Human presence therefore did not require continuous visibility or audibility. It could remain latent within material structures until mechanically restored."
+      ],
+      "position" : "Human-associated information is distributed across microscopic patterned regions of a rigid circular structure.",
+      "sites" : 9,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         84,
+         10,
+         6
+      ]
+   }
+}},4:{"centers":[27.3,44.6,59.1,74.9],"targets":[["17%","35.95%"],["35.95%","51.85%"],["51.85%","67.00%"],["67.00%","85%"]],"vote":"Belongs to SENSORY SIGNAL STRUCTURES?","family":["Human environments were not organised through material structures alone.","Humans embedded artificial systems capable of converting time, electrical state, or small bodily actions into sudden changes in sound and light.","These structures allowed conditions that could not otherwise be seen or touched to acquire an immediate sensory form. Human-built environments therefore contained an additional layer of non-material states imposed through artificial signals."],"prefix":"SS-","buttons":"\n<button type=\"button\" data-item=\"bell\" aria-pressed=\"true\" aria-label=\"SS-01 School Electric Bell\" title=\"SS-01 School Electric Bell\"></button>\n<button type=\"button\" data-item=\"clock\" aria-pressed=\"false\" aria-label=\"SS-02 Clock\" title=\"SS-02 Clock\"></button>\n<button type=\"button\" data-item=\"traffic\" aria-pressed=\"false\" aria-label=\"SS-03 Traffic Light\" title=\"SS-03 Traffic Light\"></button>\n<button type=\"button\" data-item=\"button\" aria-pressed=\"false\" aria-label=\"SS-04 Alarm Button\" title=\"SS-04 Alarm Button\"></button>\n","widths":[11,9,9,12],"heading":"Sensory Signal ","stars":"url(0bf0f97325093dbd.png)","hypothesis":["We classify these structures by their ability to introduce abrupt and highly detectable sensory events into the surrounding environment.","Across these variants, changes in sound or light can be produced by timing mechanisms, electrical switching, or minimal bodily contact. Human environments therefore contained artificial structures capable of making otherwise invisible changes immediately perceptible."],"title":"R-004 | Sensory Signal Structures","items":[{"key":"bell","name":"School Electric Bell","src":"8b25b3b73faaa155.glb"},{"key":"clock","src":"70606ad8531e3721.glb","name":"Clock"},{"key":"traffic","name":"Traffic Light","src":"dae802ece7da24eb.glb"},{"key":"button","src":"1ba6bfc3db786a98.glb","name":"Alarm Button"}],"records":{
+   "bell" : {
+      "configuration" : "FIXED ACOUSTIC CONFIGURATION",
+      "contact" : "No direct bodily contact is required during signal production.",
+      "context" : "When supplied with compatible electrical input, the structure produces a short, high-intensity acoustic signal. Recovered examples occur repeatedly within large interior sites and are positioned to distribute sound across surrounding space.",
+      "interpretation" : "A fixed signalling structure that converts an electrical state into an acoustic event detectable across a large enclosed area.",
+      "note" : [
+         "Humans embedded artificial sound-producing structures directly into their architecture.",
+         "Changes that were not physically visible could therefore be converted into acoustic events and imposed simultaneously across a shared environment."
+      ],
+      "position" : "The structure is fixed above ordinary Human reach within enclosed architectural space.",
+      "sites" : 14,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         96,
+         1,
+         3
+      ]
+   },
+   "button" : {
+      "configuration" : "MANUAL AMPLIFICATION CONFIGURATION",
+      "contact" : "A small designated surface receives direct pressure from an upper limb.",
+      "context" : "Experimental pressure applied to the marked surface activates an immediate high-intensity acoustic signal through connected structures elsewhere in the surrounding architecture. The resulting sound is abrupt, repetitive, and sufficient to dominate nearby acoustic conditions.",
+      "interpretation" : "A signalling structure that converts a small local bodily action into a large-scale acoustic event distributed through the surrounding environment.",
+      "note" : [
+         "Humans constructed systems in which the action of a single body could rapidly alter the sensory conditions experienced across a much larger space.",
+         "The physical scale of an initiating action therefore did not correspond to the scale of its environmental effect."
+      ],
+      "position" : "The contact point occupies only a minor part of a larger connected architectural system.",
+      "sites" : 10,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         88,
+         6,
+         6
+      ]
+   },
+   "clock" : {
+      "configuration" : "DELAYED ACOUSTIC CONFIGURATION",
+      "contact" : "Repeated manual contact occurs across several small control surfaces.",
+      "context" : "Recovered mechanisms allow a future moment to be selected in advance. When the selected point is reached, the structure produces an abrupt repetitive acoustic signal without further bodily contact.",
+      "interpretation" : "A programmable signalling structure that stores a Human-selected future moment and later converts it into an acoustic event.",
+      "note" : [
+         "Humans transferred future sensory events into artificial timing structures.",
+         "A bodily decision made at one moment could therefore remain inactive within a device and re-enter the environment later as sound."
+      ],
+      "position" : "The structure operates independently after adjustment and can remain inactive for an extended period before producing sound.",
+      "sites" : 22,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         94,
+         2,
+         4
+      ]
+   },
+   "traffic" : {
+      "configuration" : "MULTI-STATE VISUAL CONFIGURATION",
+      "contact" : "No direct bodily contact is required during normal signal production.",
+      "context" : "Recovered units contain separate coloured light sources capable of occupying distinct states. Comparable structures occur in repeated orientations around open movement routes, with different units linked into coordinated electrical systems.",
+      "interpretation" : "A visual signalling structure that converts changes within a wider system into distinct, highly visible environmental states.",
+      "note" : [
+         "Human environments contained spaces whose condition could be altered by light alone.",
+         "A physically unchanged route could therefore occupy different artificial states depending on which visual signal was active."
+      ],
+      "position" : "Multiple luminous surfaces are arranged within a single outward-facing structure.",
+      "sites" : 28,
+      "status" : "ACCEPTED VARIANT",
+      "vote" : [
+         91,
+         4,
+         5
+      ]
+   }
+}}};
+let items = previewArchives[1].items;
+const stage = document.querySelector('main');
+const viewer = document.querySelector('#object');
+const error = document.querySelector('#error');
+let buttons = document.querySelectorAll('[data-item]');
+const starNav = document.querySelector('.controls nav');
+let activeIndex = -1;
+viewer.addEventListener('error', () => { error.hidden = false; });
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let specimenRecords = previewArchives[1].records;
+
+const siteCloud = document.querySelector('.site-cloud');
+const siteTemplates = Array.from(siteCloud.children);
+function updateSpecimen(item, index) {
+  const record = specimenRecords[item.key];
+  const number = previewArchives[currentArchive].prefix + String(index + 1).padStart(2, '0');
+  document.querySelector('#specimen-id').textContent = number + ' / ' + record.configuration;
+  document.querySelector('#specimen-zone').textContent = record.zone ?? '';
+  document.querySelector('#specimen-count').textContent = record.sites;
+  document.querySelector('#object-name').textContent = number + ' ' + item.name;
+  const status = document.querySelector('#specimen-status');
+  status.textContent = record.status;
+  status.classList.toggle('is-contested', record.status === 'CONTESTED VARIANT');
+  const [support, oppose, undecided] = record.vote;
+  document.querySelector('#specimen-meter').value = support;
+  document.querySelector('#specimen-support').textContent = support + '%';
+  document.querySelector('#specimen-vote').textContent = 'Support ' + support + '% · Oppose ' + oppose + '% · Undecided ' + undecided + '%';
+  for (const field of ['contact', 'position', 'context', 'interpretation']) {
+    document.querySelector('#specimen-' + field).textContent = record[field];
+  }
+  const note = document.querySelector('#specimen-note');
+  note.replaceChildren(...record.note.map(text => {
+    const paragraph = document.createElement('p');
+    paragraph.textContent = text;
+    return paragraph;
+  }));
+  if (record.question) {
+    const heading = document.createElement('h3');
+    heading.textContent = 'Unresolved Question';
+    const question = document.createElement('p');
+    question.textContent = record.question;
+    note.append(heading, question);
+  }
+
+  const markers = Array.from({ length: record.sites }, (_, order) => {
+    const marker = siteTemplates[(currentArchive === 1 ? order * 7 + index * 9 : order * 11 + index * 7 + (currentArchive === 4 ? 15 : 4)) % siteTemplates.length].cloneNode();
+    marker.style.setProperty('--appear', (.12 + order * .12).toFixed(2) + 's');
+    return marker;
+  });
+  siteCloud.replaceChildren(...markers);
+}
+
+const scan = document.querySelector('.model-scan:not(.model-scan-back)');
+const scanBack = document.querySelector('.model-scan-back');
+function setScanReady(ready) {
+  scan.classList.toggle('is-ready', ready);
+  scanBack.classList.toggle('is-ready', ready);
+}
+const outline = scan.querySelector('.scan-outline');
+const brackets = scan.querySelector('.scan-brackets');
+const mask = document.createElement('canvas');
+const maskContext = mask.getContext('2d', { willReadFrequently: true });
+const sampleLevels = 12;
+let scanLoaded = false;
+let scanGeneration = 0;
+let captureTimer;
+let drawFrame;
+let targetOutline;
+let drawnOutline;
+let lastDraw;
+
+function readSilhouette(pixels, width, height) {
+  const rows = [];
+  for (let y = 0; y < height; y++) {
+    let left = width;
+    let right = -1;
+    for (let x = 0; x < width; x++) {
+      if (pixels[(y * width + x) * 4 + 3] < 96) continue;
+      left = Math.min(left, x);
+      right = x;
+    }
+    if (right >= left) rows.push({ y, left, right });
+  }
+  if (rows.length < 5 || rows.length === height && rows.every(row => row.right - row.left >= width - 2)) return null;
+  const first = rows[0].y;
+  const heightSpan = rows.at(-1).y - first + 1;
+  const leftEdge = [];
+  const rightEdge = [];
+  for (let index = 0; index < sampleLevels; index++) {
+    const y = first + (heightSpan - 1) * index / (sampleLevels - 1);
+    const nearby = rows.filter(row => Math.abs(row.y - y) <= Math.max(1, heightSpan / sampleLevels / 2));
+    const band = nearby.length ? nearby : [rows.reduce((closest, row) => Math.abs(row.y - y) < Math.abs(closest.y - y) ? row : closest)];
+    const left = Math.min(...band.map(row => row.left));
+    const right = Math.max(...band.map(row => row.right));
+    const edgeY = y + (index === 0 ? -2 : index === sampleLevels - 1 ? 2 : 0);
+    leftEdge.push({ x: (left - 3) / width, y: edgeY / height });
+    rightEdge.push({ x: (right + 4) / width, y: edgeY / height });
+  }
+  return leftEdge.concat(rightEdge.reverse());
+}
+
+function drawSilhouette(now) {
+  if (!scanLoaded) return;
+  if (targetOutline) {
+    const bounds = viewer.getBoundingClientRect();
+    const stageBounds = stage.getBoundingClientRect();
+    const easing = reduceMotion.matches ? 1 : 1 - Math.exp(-Math.min(now - lastDraw, 55) / 100);
+    drawnOutline = targetOutline.map((point, index) => {
+      const previous = drawnOutline?.[index] ?? point;
+      return { x: previous.x + (point.x - previous.x) * easing, y: previous.y + (point.y - previous.y) * easing };
+    });
+    for (const layer of [scan, scanBack]) {
+      layer.style.left = (bounds.left - stageBounds.left) + 'px';
+      layer.style.top = (bounds.top - stageBounds.top) + 'px';
+      layer.style.width = bounds.width + 'px';
+      layer.style.height = bounds.height + 'px';
+      layer.setAttribute('viewBox', '0 0 ' + bounds.width + ' ' + bounds.height);
+    }
+    const screen = drawnOutline.map(point => ({ x: point.x * bounds.width, y: point.y * bounds.height }));
+    outline.setAttribute('points', screen.map(point => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' '));
+    const upper = screen[2];
+    const lower = screen[sampleLevels + 2];
+    brackets.setAttribute('d', 'M' + (upper.x + 18) + ' ' + (upper.y - 13) + 'H' + (upper.x - 10) + 'V' + (upper.y + 18) +
+      'M' + (lower.x - 18) + ' ' + (lower.y + 13) + 'H' + (lower.x + 10) + 'V' + (lower.y - 18));
+    setScanReady(true);
+  }
+  lastDraw = now;
+  drawFrame = requestAnimationFrame(drawSilhouette);
+}
+
+async function sampleSilhouette(generation) {
+  if (!scanLoaded || generation !== scanGeneration || !maskContext) return;
+  try {
+    const blob = await viewer.toBlob({ mimeType: 'image/png', idealAspect: false });
+    if (generation !== scanGeneration) return;
+    const bitmap = await createImageBitmap(blob, {
+      resizeWidth: 128,
+      resizeHeight: Math.max(32, Math.round(128 * viewer.clientHeight / Math.max(1, viewer.clientWidth))),
+      resizeQuality: 'low',
+    });
+    if (generation === scanGeneration) {
+      if (mask.width !== bitmap.width || mask.height !== bitmap.height) {
+        mask.width = bitmap.width;
+        mask.height = bitmap.height;
+      }
+      maskContext.clearRect(0, 0, mask.width, mask.height);
+      maskContext.drawImage(bitmap, 0, 0);
+      const pixels = maskContext.getImageData(0, 0, mask.width, mask.height).data;
+      targetOutline = readSilhouette(pixels, mask.width, mask.height);
+      if (!targetOutline) setScanReady(false);
+    }
+    bitmap.close();
+  } catch {
+    if (generation === scanGeneration) { targetOutline = undefined; setScanReady(false); }
+  }
+  if (generation === scanGeneration) captureTimer = setTimeout(() => sampleSilhouette(generation), 100);
+}
+viewer.addEventListener('load', () => {
+  if (scanLoaded) return;
+  scanLoaded = true;
+  lastDraw = performance.now();
+  drawFrame = requestAnimationFrame(drawSilhouette);
+  captureTimer = setTimeout(() => sampleSilhouette(scanGeneration), 80);
+});
+function selectItem(index, showText = true) {
+  if (!currentArchive) return;
+  if (index === activeIndex || (showText && archiveTransition)) return;
+  const animateStar = activeIndex !== -1;
+  activeIndex = index;
+  setScanReady(false);
+  scanLoaded = false;
+  scanGeneration++;
+  clearTimeout(captureTimer);
+  cancelAnimationFrame(drawFrame);
+  targetOutline = undefined;
+  drawnOutline = undefined;
+  const item = items[index];
+  stage.dataset.specimen = item.key;
+  activeDecodes.get(recordCard)?.();
+  hideLens(true);
+  activeDecodes.get(distribution)?.();
+  updateSpecimen(item, index);
+  prepareArchivePaint();
+  if (showText) pulseRecord();
+  error.hidden = true;
+  viewer.setAttribute('alt', '3D model of ' + item.name);
+  viewer.dataset.object = item.key;
+  viewer.setAttribute('src', item.src);
+  for (const button of buttons) button.setAttribute('aria-pressed', button.dataset.item === item.key);
+  const starCenters = previewArchives[currentArchive].centers;
+  starNav.style.setProperty('--star-center', starCenters[index] + '%');
+  const starWidths = previewArchives[currentArchive].widths;
+  starNav.style.setProperty('--star-width', starWidths[index] + '%');
+  if (animateStar && !reduceMotion.matches) {
+    starNav.dataset.nudge = starNav.dataset.nudge === 'a' ? 'b' : 'a';
+  }
+}
+starNav.addEventListener('animationend', (event) => {
+  if (event.animationName.startsWith('star-motion-') && event.animationName.endsWith(starNav.dataset.nudge)) delete starNav.dataset.nudge;
+});
+starNav.addEventListener('click', event => {
+  const index = Array.from(buttons).indexOf(event.target.closest('[data-item]'));
+  if (index >= 0) selectItem(index);
+});
+const ignoreSwipe = '.notes-molecules';
+function stepModel(direction) {
+  selectItem((activeIndex + direction + items.length) % items.length);
+}
+let wheelTotal = 0;
+let wheelLast = 0;
+let wheelUsed = false;
+window.addEventListener('wheel', event => {
+  const target = event.target;
+  if (event.ctrlKey || !stage.contains(target) || target.closest?.(ignoreSwipe)) return;
+  const x = event.deltaX || (event.shiftKey ? event.deltaY : -(event.wheelDeltaX || 0));
+  const vertical = event.shiftKey ? 0 : Math.abs(event.deltaY);
+  if (!x || Math.abs(x) < vertical * .85) return;
+  if (event.cancelable) event.preventDefault();
+  const now = performance.now();
+  if (now - wheelLast > 240) {
+    wheelTotal = 0;
+    wheelUsed = false;
+  }
+  wheelLast = now;
+  if (wheelUsed) return;
+  const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientWidth : 1;
+  wheelTotal += x * multiplier;
+  if (Math.abs(wheelTotal) >= 24) {
+    wheelUsed = true;
+    stepModel(Math.sign(wheelTotal));
+  }
+}, { passive: false, capture: true });
+let touchStart;
+stage.addEventListener('pointerdown', event => {
+  if (event.pointerType !== 'touch' || !event.isPrimary || event.target.closest(ignoreSwipe + ', model-viewer, .controls')) return;
+  touchStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+});
+stage.addEventListener('pointerup', event => {
+  if (event.pointerId !== touchStart?.id) return;
+  const dx = event.clientX - touchStart.x;
+  const dy = event.clientY - touchStart.y;
+  touchStart = undefined;
+  if (Math.abs(dx) >= 42 && Math.abs(dx) > Math.abs(dy) * 1.35) stepModel(-Math.sign(dx));
+});
+stage.addEventListener('pointercancel', event => {
+  if (event.pointerId === touchStart?.id) touchStart = undefined;
+});
+
+let starDrag;
+let suppressStarClick = false;
+starNav.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || !event.isPrimary) return;
+  suppressStarClick = false;
+  starDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+});
+starNav.addEventListener('pointermove', event => {
+  if (event.pointerId !== starDrag?.id || starDrag.moved) return;
+  const x = Math.abs(event.clientX - starDrag.x);
+  const y = Math.abs(event.clientY - starDrag.y);
+  if (x < 12 || x <= y) return;
+  starDrag.moved = true;
+  starNav.setPointerCapture(event.pointerId);
+});
+starNav.addEventListener('pointerup', event => {
+  if (event.pointerId !== starDrag?.id) return;
+  const dx = event.clientX - starDrag.x;
+  const dy = event.clientY - starDrag.y;
+  const swipe = Math.abs(dx) >= 32 && Math.abs(dx) > Math.abs(dy) * 1.2;
+  suppressStarClick = starDrag.moved || swipe;
+  starDrag = undefined;
+  if (swipe) stepModel(-Math.sign(dx));
+});
+starNav.addEventListener('pointercancel', () => { starDrag = undefined; });
+starNav.addEventListener('lostpointercapture', () => { starDrag = undefined; });
+starNav.addEventListener('click', event => {
+  if (!suppressStarClick || !event.detail) return;
+  event.stopImmediatePropagation();
+  suppressStarClick = false;
+}, true);
+
+
+const archiveDock = document.querySelector('.notes-molecules');
+const intakeScreen = document.querySelector('#intake-screen');
+const intakeDockSlot = intakeScreen.querySelector('.intake-dock');
+const archiveTray = archiveDock.querySelector('.ball-tray');
+const archiveMouth = archiveDock.querySelector('.archive-drop');
+const archiveStatus = archiveDock.querySelector('#archive-drop-status');
+const archiveRoot = archiveDock.dataset.root;
+let currentArchive = Number(archiveDock.dataset.archive);
+
+const archiveMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let activeDrag;
+let armedBall;
+let archiveTransition = false;
+
+window.addEventListener('pageshow', event => {
+  if (event.persisted) {
+    document.body.classList.remove('dock-leaving', 'dock-exchanging');
+    document.documentElement.classList.remove('dock-shared-scene');
+    archiveMouth.classList.remove('is-swallowing');
+    archiveMouth.textContent = archiveGlyph(currentArchive);
+    archiveTray.querySelector('.is-dragged')?.classList.remove('is-dragged');
+    document.querySelector('.dragged-token')?.remove();
+    armBall(undefined);
+    archiveTransition = false;
+  }
+});
+const dockMotionQuery = new URLSearchParams(location.search);
+const dockMotionSource = dockMotionQuery.get('dock');
+const dockMotionParts = new Map([
+  ['tray', archiveTray],
+  ['mark', archiveDock.querySelector('.tray-letter')],
+  ['mouth', archiveMouth],
+  ...Array.from(archiveTray.querySelectorAll('.notes-dot'), ball => [ball.dataset.archive, ball]),
+]);
+
+function leaveThroughDock(destination, replaces, releasedGhost) {
+  if (!archiveMotion.matches && typeof Element.prototype.animate === 'function') {
+    const bounds = { fromHome: !currentArchive, label: archiveMouth.textContent, replaces };
+    for (const [key, element] of dockMotionParts) {
+      if (element.classList.contains('is-dragged')) continue;
+      const { x, y, width, height } = element.getBoundingClientRect();
+      bounds[key] = [x / innerWidth, y / innerHeight, width / innerWidth, height / innerHeight]
+        .map(value => Number(value.toFixed(5)));
+    }
+    if (releasedGhost) {
+      const { x, y, width, height } = releasedGhost.getBoundingClientRect();
+      bounds[replaces] = [x / innerWidth, y / innerHeight, width / innerWidth, height / innerHeight];
+    }
+    const url = new URL(destination, location.href);
+    url.searchParams.set('dock', JSON.stringify(bounds));
+    document.body.classList.add('dock-leaving');
+    window.setTimeout(() => location.assign(url.href), replaces ? 40 : 140);
+  } else {
+    location.assign(destination);
+  }
+}
+
+async function arriveThroughDock(modelReady) {
+  const preview = document.querySelector('#dock-load-preview');
+  document.documentElement.classList.remove('dock-pending');
+  if (!dockMotionSource) return;
+  dockMotionQuery.delete('dock');
+  const remaining = dockMotionQuery.toString();
+  history.replaceState(null, '', location.pathname + (remaining ? '?' + remaining : '') + location.hash);
+  if (archiveMotion.matches || typeof Element.prototype.animate !== 'function') { preview?.remove(); return; }
+  let origin;
+  try { origin = JSON.parse(dockMotionSource); } catch { preview?.remove(); return; }
+  if (!origin || !Array.isArray(origin.tray) || !Array.isArray(origin.mouth)) { preview?.remove(); return; }
+
+  const returning = currentArchive === 0;
+  const released = currentArchive <= 2 && (origin.replaces === 1 || origin.replaces === 2)
+    ? dockMotionParts.get(String(origin.replaces)) : null;
+  const duration = released ? 230 : returning ? 640 : 560;
+  const overlay = document.createElement('div');
+  overlay.className = 'dock-motion-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.append(overlay);
+  document.body.classList.add('dock-arriving');
+  archiveDock.classList.add('dock-in-motion');
+  const animations = [];
+  try {
+    for (const [key, element] of dockMotionParts) {
+      const source = origin[key];
+      if (!Array.isArray(source) || source.length !== 4 ||
+          source.some(value => !Number.isFinite(value) || Math.abs(value) > 3) ||
+          source[2] <= 0 || source[3] <= 0) continue;
+      const target = element.getBoundingClientRect();
+      if (!target.width || !target.height) continue;
+      const style = getComputedStyle(element);
+      const layer = document.createElement('div');
+      layer.className = 'dock-motion-part';
+      layer.style.left = target.x + 'px';
+      layer.style.top = target.y + 'px';
+      layer.style.width = target.width + 'px';
+      layer.style.height = target.height + 'px';
+      layer.style.background = style.background;
+      layer.style.borderRadius = style.borderRadius;
+      layer.style.font = style.font;
+      layer.style.color = style.color;
+      if (key === 'mark' || key === 'mouth') layer.textContent =
+        key === 'mouth' && returning ? dockMotionQuery.get('released') : element.textContent;
+      overlay.append(layer);
+
+      const widthScale = source[2] * innerWidth / target.width;
+      const heightScale = source[3] * innerHeight / target.height;
+      const x = (source[0] + source[2] / 2) * innerWidth - target.x - target.width / 2;
+      const y = (source[1] + source[3] / 2) * innerHeight - target.y - target.height / 2;
+      const scale = key === 'tray' ? widthScale + ', ' + heightScale : widthScale;
+      animations.push(layer.animate([
+        { transform: 'translate3d(' + x + 'px,' + y + 'px,0) scale(' + scale + ')' },
+        { transform: 'translate3d(0,0,0) scale(1)' },
+      ], { duration, easing: 'cubic-bezier(.22,.75,.23,1)', fill: 'both' }));
+    }
+    preview?.remove();
+    await Promise.allSettled(animations.map(animation => animation.finished));
+    await modelReady;
+  } finally {
+    preview?.remove();
+    overlay.remove();
+    archiveDock.classList.remove('dock-in-motion');
+    document.body.classList.remove('dock-arriving');
+    document.documentElement.classList.remove('dock-shared-scene');
+  }
+}
+
+
+function archiveGlyph(number) {
+  return ['', 'ⵣ', 'ⵎ', 'ⵙ', 'ⵟ'][Number(number)] || '';
+}
+
+function archiveNumber(number) {
+  return String(number).padStart(3, '0');
+}
+
+function moveBall(ball, from, to, startScale, endScale, duration = 290) {
+  if (archiveMotion.matches) return Promise.resolve();
+  return ball.animate([
+    { left: from.x + 'px', top: from.y + 'px', transform: 'translate(-50%, -50%) scale(' + startScale + ')' },
+    { left: to.x + 'px', top: to.y + 'px', transform: 'translate(-50%, -50%) scale(' + endScale + ')' },
+  ], { duration, easing: 'ease-in-out', fill: 'forwards' }).finished;
+}
+
+function centerOf(element) {
+  const bounds = element.getBoundingClientRect();
+  return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+}
+
+function makeGhost(size) {
+  const ghost = document.createElement('span');
+  ghost.className = 'dragged-token';
+  ghost.style.width = ghost.style.height = size + 'px';
+  document.body.append(ghost);
+  return ghost;
+}
+
+function overMouth(x, y, ball) {
+  const center = centerOf(archiveMouth);
+  const tolerance = Math.min(29, Math.max(12, ball.offsetWidth * .42 + 8));
+  return Math.hypot(x - center.x, y - center.y) <= archiveMouth.offsetWidth / 2 + tolerance;
+}
+
+function armBall(ball) {
+  armedBall?.classList.remove('is-armed');
+  armedBall = ball;
+  armedBall?.classList.add('is-armed');
+  archiveMouth.setAttribute('aria-disabled', String(!currentArchive && !ball));
+  archiveMouth.setAttribute('aria-label', currentArchive ? 'Release current archive and return to directory' : 'Drop token to open archive');
+  if (ball) archiveStatus.textContent = 'R-' + archiveNumber(Number(ball.dataset.archive)) + ' selected. Activate the red circle.';
+}
+
+async function ejectCurrentToken(swallowed) {
+  const ghost = makeGhost(swallowed.offsetWidth);
+  ghost.dataset.label = archiveGlyph(currentArchive);
+  const mouth = centerOf(archiveMouth);
+  const tray = archiveTray.getBoundingClientRect();
+  const target = { x: tray.left + tray.width * .68, y: tray.top + tray.height * .48 };
+  const lip = { x: mouth.x + archiveMouth.offsetWidth * .48, y: mouth.y - archiveMouth.offsetWidth * .22 };
+  const arc = { x: (lip.x + target.x) / 2, y: Math.min(lip.y, target.y) - ghost.offsetWidth * .48 };
+  function frame(point, scale, offset) {
+    return { left: point.x + 'px', top: point.y + 'px',
+      transform: 'translate(-50%, -50%) scale(' + scale + ')', offset };
+  }
+  ghost.style.left = target.x + 'px';
+  ghost.style.top = target.y + 'px';
+  await playFusion(ghost, ghost.animate([
+    frame(mouth, .1, 0),
+    frame(lip, .77, .31),
+    frame(arc, 1.08, .49),
+    frame(target, 1, .86),
+    frame(target, 1, 1),
+  ], { duration: 820, easing: 'cubic-bezier(.27,.64,.3,1)', fill: 'both' })).catch(() => {});
+  return ghost;
+}
+
+async function exchangeArchiveToken(ball, incomingGhost, point, mouth, onCovered) {
+  const squeeze = archiveMouth.animate([
+    { transform: 'scale(1)' },
+    { transform: 'scale(1.13, .94)', offset: .32 },
+    { transform: 'scale(.78, 1.13)' },
+  ], { duration: 520, easing: 'ease-in-out', fill: 'forwards' });
+  const intake = absorbArchiveBall(incomingGhost, point, mouth, 520);
+  await Promise.allSettled([squeeze.finished, intake]);
+  incomingGhost.remove();
+
+  // Hold the compressed shape briefly so intake and ejection read separately.
+  await new Promise(resolve => setTimeout(resolve, 245));
+  const rebound = archiveMouth.animate([
+    { transform: 'scale(.78, 1.13)' },
+    { transform: 'scale(1.15, .91)', offset: .38 },
+    { transform: 'scale(.98, 1.03)', offset: .74 },
+    { transform: 'scale(1)' },
+  ], { duration: 300, easing: 'ease-out', fill: 'both' });
+  squeeze.cancel();
+  const ejected = ejectCurrentToken(ball);
+  onCovered?.();
+  const relabel = setTimeout(() => { archiveMouth.textContent = ball.dataset.label; }, 185);
+  try {
+    await rebound.finished.catch(() => {});
+    return await ejected;
+  } finally {
+    clearTimeout(relabel);
+    rebound.cancel();
+  }
+}
+
+let modelViewerReady;
+function loadArchiveAssets() {
+  for (const artwork of stage.querySelectorAll('[data-archive-src], [data-archive-href]')) {
+    const attribute = artwork.hasAttribute('data-archive-src') ? 'src' : 'href';
+    artwork.setAttribute(attribute, artwork.getAttribute('data-archive-' + attribute));
+    artwork.removeAttribute('data-archive-' + attribute);
+  }
+  if (!modelViewerReady) {
+    modelViewerReady = import('https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js')
+      .catch(() => {
+        modelViewerReady = undefined;
+        if (currentArchive) error.hidden = false;
+      });
+  }
+}
+
+function configurePreviewArchive(number, showText = false) {
+  loadArchiveAssets();
+  const archive = previewArchives[number];
+  currentArchive = number;
+  archiveDock.dataset.archive = number;
+  items = archive.items;
+  specimenRecords = archive.records;
+  activeIndex = -1;
+  stage.dataset.archive = number;
+  document.title = archive.title + ' | Same-page preview';
+  recordCard.querySelector('h1').firstChild.data = archive.heading;
+  recordCard.querySelector('.specimen-vote p').textContent = archive.vote;
+  for (const [selector, copy] of [
+    ['.specimen-columns section:first-child > p', archive.hypothesis],
+    ['.family-note > p', archive.family],
+  ]) {
+    const oldParagraphs = Array.from(recordCard.querySelectorAll(selector));
+    const section = oldParagraphs[0].parentElement;
+    for (const paragraph of oldParagraphs) paragraph.remove();
+    const fragment = document.createDocumentFragment();
+    for (const text of copy) {
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      fragment.append(paragraph);
+    }
+    section.querySelector('h2').after(fragment);
+  }
+  for (const scroller of recordCard.querySelectorAll('.specimen-columns section, .specimen-note')) {
+    scroller.scrollTop = 0;
+  }
+  starNav.innerHTML = archive.buttons;
+  starNav.style.setProperty('--star-art', archive.stars);
+  delete starNav.dataset.nudge;
+  buttons = starNav.querySelectorAll('[data-item]');
+  starNav.querySelectorAll('[data-item]').forEach((button, index) => {
+    const [start, end] = archive.targets[index];
+    button.style.setProperty('--start', start);
+    button.style.setProperty('--end', end);
+  });
+  siteCloud.parentElement.dataset.archiveSites = archiveNumber(number);
+  siteCloud.closest('svg').setAttribute('aria-label', 'Archive ' + archiveNumber(number) + ' fictional discovery sites over Manchester');
+  selectItem(0, showText);
+}
+
+async function swapPreviewArchive(number, ball, incomingGhost, point, mouth) {
+  const previous = currentArchive;
+  const motion = !archiveMotion.matches && typeof Element.prototype.animate === 'function';
+  let ready;
+  let releasedGhost;
+  hideLens(true);
+  function prepareNextArchive() {
+    ready = waitForFirstModel();
+    configurePreviewArchive(number);
+  }
+  try {
+    if (motion) {
+      document.documentElement.classList.add('dock-shared-scene');
+      document.body.classList.add('dock-exchanging');
+      // The old scene has faded by the time the red ball starts to eject.
+      releasedGhost = await exchangeArchiveToken(ball, incomingGhost, point, mouth, prepareNextArchive);
+    } else {
+      incomingGhost.remove();
+      prepareNextArchive();
+    }
+    await ready;
+    setIntakeAddress(number);
+    archiveMouth.textContent = archiveGlyph(number);
+    dockMotionParts.delete(String(number));
+    ball.dataset.archive = previous;
+    ball.dataset.label = archiveGlyph(previous);
+    ball.setAttribute('aria-label', 'Select archive R-' + archiveNumber(previous));
+    dockMotionParts.set(String(previous), ball);
+    armBall(undefined);
+    if (releasedGhost && motion) {
+      await moveBall(releasedGhost, centerOf(releasedGhost), centerOf(ball), 1, 1, 240).catch(() => {});
+    }
+  } finally {
+    releasedGhost?.remove();
+    incomingGhost.remove();
+    ball.classList.remove('is-dragged');
+    document.body.classList.remove('dock-exchanging');
+    document.documentElement.classList.remove('dock-shared-scene');
+    archiveTransition = false;
+    prepareArchivePaint();
+    pulseRecord();
+  }
+}
+
+async function swallow(ball, ghost, point) {
+  const number = Number(ball.dataset.archive);
+  const mouth = centerOf(archiveMouth);
+  archiveTransition = true;
+  ball.classList.add('is-dragged');
+  ghost ||= makeGhost(ball.offsetWidth);
+    if (!currentArchive) {
+      await enterArchiveFromIntake(number, ball, ghost, point, mouth);
+    } else {
+      await swapPreviewArchive(number, ball, ghost, point, mouth);
+    }
+}
+
+const liquidLink = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+liquidLink.classList.add('archive-liquid-link');
+liquidLink.setAttribute('aria-hidden', 'true');
+liquidLink.style.display = 'none';
+liquidLink.innerHTML = '<defs><filter id="archive-metaball" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+  '<feGaussianBlur/><feComponentTransfer><feFuncA type="linear" slope="24" intercept="-10.8"/></feComponentTransfer></filter></defs>' +
+  '<g filter="url(#archive-metaball)"><ellipse fill="#c92430"/><ellipse fill="#181715"/></g>';
+document.body.append(liquidLink);
+const metaballBlur = liquidLink.querySelector('feGaussianBlur');
+const [redBlob, blackBlob] = liquidLink.querySelectorAll('ellipse');
+let fusionFrame;
+let fusionGhost;
+
+function hideFusion(ghost) {
+  liquidLink.style.display = 'none';
+  archiveMouth.classList.remove('is-fusing');
+  ghost?.classList.remove('is-fusing');
+}
+
+function paintFusion(ghost) {
+  const red = archiveMouth.getBoundingClientRect();
+  const black = ghost.getBoundingClientRect();
+  const gap = Math.hypot(red.x + red.width / 2 - black.x - black.width / 2,
+    red.y + red.height / 2 - black.y - black.height / 2);
+  const blur = Math.max(2, Math.min(15, ghost.offsetWidth * .28));
+  if (gap > (Math.max(red.width, red.height) + black.width) / 2 + blur * 2.4) {
+    hideFusion(ghost);
+    return;
+  }
+  const pad = Math.ceil(blur * 4);
+  const left = Math.floor(Math.min(red.left, black.left)) - pad;
+  const top = Math.floor(Math.min(red.top, black.top)) - pad;
+  const width = Math.ceil(Math.max(red.right, black.right) - left) + pad;
+  const height = Math.ceil(Math.max(red.bottom, black.bottom) - top) + pad;
+  liquidLink.style.display = 'block';
+  liquidLink.style.transform = 'translate(' + left + 'px,' + top + 'px)';
+  liquidLink.setAttribute('width', width);
+  liquidLink.setAttribute('height', height);
+  metaballBlur.setAttribute('stdDeviation', blur);
+  for (const [shape, bounds] of [[redBlob, red], [blackBlob, black]]) {
+    shape.setAttribute('cx', bounds.left - left + bounds.width / 2);
+    shape.setAttribute('cy', bounds.top - top + bounds.height / 2);
+    shape.setAttribute('rx', bounds.width / 2);
+    shape.setAttribute('ry', bounds.height / 2);
+  }
+  redBlob.setAttribute('fill', archiveMouth.classList.contains('is-over') ? '#e32c38' : '#c92430');
+  archiveMouth.classList.add('is-fusing');
+  ghost.classList.add('is-fusing');
+}
+
+function trackFusion(ghost) {
+  if (fusionGhost === ghost) return;
+  cancelAnimationFrame(fusionFrame);
+  fusionGhost = ghost;
+  function draw() {
+    paintFusion(ghost);
+    fusionFrame = requestAnimationFrame(draw);
+  }
+  fusionFrame = requestAnimationFrame(draw);
+}
+
+function stopFusion(ghost) {
+  if (fusionGhost !== ghost) return;
+  cancelAnimationFrame(fusionFrame);
+  fusionGhost = undefined;
+  hideFusion(ghost);
+}
+
+async function playFusion(ghost, animation) {
+  trackFusion(ghost);
+  try {
+    await animation.finished;
+  } finally {
+    stopFusion(ghost);
+  }
+}
+
+function absorbArchiveBall(ghost, point, mouth, duration) {
+  if (archiveMotion.matches) return Promise.resolve();
+  return playFusion(ghost, ghost.animate([
+    { left: point.x + 'px', top: point.y + 'px', transform: 'translate(-50%, -50%) scale(1)' },
+    { offset: .45, left: (point.x + mouth.x) / 2 + 'px', top: (point.y + mouth.y) / 2 + 'px',
+      transform: 'translate(-50%, -50%) scale(.96)' },
+    { left: mouth.x + 'px', top: mouth.y + 'px', transform: 'translate(-50%, -50%) scale(.02)' },
+  ], { duration, easing: 'cubic-bezier(.35,.12,.42,1)', fill: 'forwards' }));
+}
+
+function updateDrag(event) {
+  if (event.pointerId !== activeDrag?.id) return;
+  const { ball, ghost } = activeDrag;
+  const red = centerOf(archiveMouth);
+  const dx = event.clientX - red.x;
+  const dy = event.clientY - red.y;
+  const reach = archiveMouth.offsetWidth / 2 + ball.offsetWidth * 1.35 + 25;
+  const pull = Math.max(0, 1 - Math.hypot(dx, dy) / reach) * .45;
+  ghost.style.left = (event.clientX - dx * pull) + 'px';
+  ghost.style.top = (event.clientY - dy * pull) + 'px';
+  archiveMouth.classList.toggle('is-over', overMouth(event.clientX, event.clientY, ball));
+  if (pull > 0) trackFusion(ghost);
+  else stopFusion(ghost);
+}
+
+async function returnBall(ball, ghost, point) {
+  archiveTransition = true;
+  await moveBall(ghost, point, centerOf(ball), 1, 1);
+  ball.classList.remove('is-dragged');
+  ghost.remove();
+  archiveTransition = false;
+}
+function endDrag(event, canDrop) {
+  if (event.pointerId !== activeDrag?.id) return;
+  const { ball, ghost } = activeDrag;
+  const point = centerOf(ghost);
+  activeDrag = undefined;
+  archiveMouth.classList.remove('is-over', 'is-hungry');
+  if (canDrop && overMouth(event.clientX, event.clientY, ball)) {
+    void swallow(ball, ghost, point);
+  } else {
+    stopFusion(ghost);
+    void returnBall(ball, ghost, point);
+  }
+}
+
+function bindArchiveBall(ball) {
+  ball.addEventListener('pointerdown', event => {
+    if (archiveTransition || activeDrag || event.button !== 0) return;
+    event.preventDefault();
+    armBall(undefined);
+    activeDrag = { id: event.pointerId, ball, ghost: makeGhost(ball.offsetWidth) };
+    activeDrag.ghost.dataset.label = ball.dataset.label;
+    archiveMouth.classList.add('is-hungry');
+    ball.classList.add('is-dragged');
+    ball.setPointerCapture(event.pointerId);
+    updateDrag(event);
+  });
+  ball.addEventListener('pointermove', updateDrag);
+  ball.addEventListener('pointerup', event => endDrag(event, true));
+  ball.addEventListener('pointercancel', event => endDrag(event, false));
+  ball.addEventListener('lostpointercapture', event => endDrag(event, false));
+  ball.addEventListener('click', event => {
+    if (event.detail || archiveTransition) return;
+    armBall(ball);
+    archiveMouth.focus();
+  });
+}
+
+archiveTray.querySelectorAll('.notes-dot').forEach(bindArchiveBall);
+
+archiveMouth.addEventListener('click', () => {
+  if (activeDrag || archiveTransition) return;
+  if (armedBall) {
+    void swallow(armedBall, undefined, centerOf(armedBall));
+  } else if (currentArchive) {
+    void returnToIntake();
+  }
+});
+
+
+let modelPointer;
+let modelResumeAt = 0;
+let previousRotationFrame;
+let rotationFrame;
+viewer.addEventListener('pointerdown', event => {
+  if (event.isPrimary) modelPointer = event.pointerId;
+}, true);
+
+function resumeModelRotation(event) {
+  if (modelPointer === undefined || event.type !== 'blur' && event.pointerId !== modelPointer) return;
+  modelPointer = undefined;
+  modelResumeAt = performance.now() + 500;
+}
+window.addEventListener('pointerup', resumeModelRotation, true);
+window.addEventListener('pointercancel', resumeModelRotation, true);
+viewer.addEventListener('lostpointercapture', resumeModelRotation);
+window.addEventListener('blur', resumeModelRotation);
+
+function turnModel(now) {
+  const elapsed = Math.min(now - (previousRotationFrame ?? now), 50);
+  previousRotationFrame = now;
+  if (!reduceMotion.matches && !document.hidden && viewer.loaded && modelPointer === undefined && now >= modelResumeAt) {
+    viewer.resetTurntableRotation(viewer.turntableRotation + elapsed * (14 * Math.PI / 180) / 1000);
+  }
+  rotationFrame = requestAnimationFrame(turnModel);
+}
+viewer.addEventListener('load', () => {
+  if (rotationFrame === undefined) rotationFrame = requestAnimationFrame(turnModel);
+});
+
+const decodeMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const activeDecodes = new Map();
+const hiddenType = typeof Highlight === 'function' && CSS.highlights ? new Highlight() : null;
+const paperType = hiddenType ? new Highlight() : null;
+if (hiddenType) {
+  paperType.priority = 1;
+  CSS.highlights.set('archive-untyped', hiddenType);
+  CSS.highlights.set('archive-paper', paperType);
+}
+
+function decodeText(root) {
+  activeDecodes.get(root)?.();
+  if (!hiddenType || decodeMotion.matches) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      return /\S/.test(node.data) && parent.getClientRects().length && !parent.closest('[aria-hidden="true"]')
+        ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    },
+  });
+  const lines = [];
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    hiddenType.add(range);
+    const paper = Array.from(node.data.matchAll(/\S+/g)).flatMap((word, index) => {
+      if ((index + lines.length) % 5 !== 1 || word[0].length < 2) return [];
+      const from = word.index;
+      const end = from + Math.min(word[0].length, 2 + (index + lines.length) % 4);
+      const block = document.createRange();
+      block.setStart(node, from);
+      block.setEnd(node, end);
+      paperType.add(block);
+      return [{ block, from, end }];
+    });
+    const painted = paintedNodes.get(node);
+    if (painted) painted.visible = 0;
+    lines.push({ node, range, paper, painted, printed: 0, overflow: node.parentElement.closest('.specimen-columns section, .specimen-note') });
+  }
+  if (!lines.length) return;
+  root.classList.add('archive-is-typing');
+  const cursors = Array.from({ length: Math.min(3, lines.length) }, () => {
+    const cursor = document.createElement('i');
+    cursor.className = 'archive-type-cursor';
+    cursor.setAttribute('aria-hidden', 'true');
+    document.body.append(cursor);
+    return cursor;
+  });
+  let frame;
+  let lastTick = -Infinity;
+  let start;
+  const cleanup = () => {
+    cancelAnimationFrame(frame);
+    for (const line of lines) {
+      hiddenType.delete(line.range);
+      if (line.painted) line.painted.visible = line.node.length;
+      line.paper.forEach(({ block }) => paperType.delete(block));
+    }
+    root.classList.remove('archive-is-typing');
+    cursors.forEach(cursor => cursor.remove());
+    activeDecodes.delete(root);
+    drawArchivePaint();
+  };
+  activeDecodes.set(root, cleanup);
+
+  function type(now) {
+    start ??= now;
+    if (now - lastTick >= 38) {
+      lastTick = now;
+      let visible = 0;
+      let pending = false;
+      for (const [index, line] of lines.entries()) {
+        const length = line.node.length;
+        const delay = Math.min(index * 34, 360);
+        const duration = Math.min(1140, 180 + length * 10);
+        const progress = Math.min(1, Math.max(0, (now - start - delay) / duration));
+        const next = Math.floor(progress * length);
+        pending ||= next < length;
+        if (next <= line.printed) continue;
+        line.range.setStart(line.node, next);
+        line.printed = next;
+        if (line.painted) line.painted.visible = next;
+        for (const { block, from, end } of line.paper) {
+          if (next >= end) paperType.delete(block);
+          else if (next > from) block.setStart(line.node, next);
+        }
+        if (next === length) {
+          hiddenType.delete(line.range);
+          continue;
+        }
+        if (visible >= cursors.length || !/\S/.test(line.node.data[next])) continue;
+        const at = document.createRange();
+        at.setStart(line.node, next);
+        at.setEnd(line.node, next + 1);
+        const rect = at.getBoundingClientRect();
+        const clip = line.overflow?.getBoundingClientRect();
+        if (!rect.height || rect.bottom < 0 || rect.top > innerHeight || (clip && (rect.top < clip.top || rect.bottom > clip.bottom))) continue;
+        const cursor = cursors[visible++];
+        const shape = (index * 13 + next * 7) % 9;
+        cursor.style.left = rect.left + 'px';
+        cursor.style.top = (rect.top + rect.height * (.1 + shape * .035)) + 'px';
+        cursor.style.width = Math.max(3, Math.min(rect.width * 1.3, 4 + shape * 1.5)) + 'px';
+        cursor.style.height = rect.height * (.35 + shape * .055) + 'px';
+        cursor.hidden = false;
+      }
+      for (let i = visible; i < cursors.length; i++) cursors[i].hidden = true;
+      drawArchivePaint();
+      if (!pending) {
+        cleanup();
+        return;
+      }
+    }
+    frame = requestAnimationFrame(type);
+  }
+  frame = requestAnimationFrame(type);
+}
+
+const recordCard = document.querySelector('.specimen-card');
+
+function pulseRecord() {
+  decodeText(recordCard);
+  decodeText(document.querySelector('.specimen-distribution'));
+  drawArchivePaint();
+}
+
+const distribution = document.querySelector('.specimen-distribution');
+const typographyRoots = [recordCard, distribution];
+const faces = [
+  ['Archive Grotesk', 100], ['Archive Outata', 400], ['Archive Onlytrue Small', 400],
+  ['Archive Grotesk', 700], ['Archive Revival', 400], ['Archive Onlytrue', 400],
+  ['Archive Grotesk', 300], ['Archive Onlytrue Blob', 400], ['Archive Grotesk', 400],
+];
+
+for (const label of intakeScreen.querySelectorAll('[data-mixed-type]')) {
+  const copy = label.textContent;
+  let seed = copy.length;
+  label.setAttribute('aria-label', copy);
+  label.replaceChildren(...copy.split(/(\s+)/).map(word => {
+    if (!/\S/.test(word)) return document.createTextNode(word);
+    const group = document.createElement('span');
+    group.setAttribute('aria-hidden', 'true');
+    for (const character of word) {
+      const glyph = document.createElement('span');
+      const [face, weight] = faces[seed++ % faces.length];
+      glyph.style.fontFamily = '"' + face + '", Georgia, serif';
+      glyph.style.fontWeight = weight;
+      glyph.textContent = character;
+      group.append(glyph);
+    }
+    return group;
+  }));
+}
+
+const paintedType = hiddenType ? new Highlight() : null;
+if (paintedType) CSS.highlights.set('archive-painted-type', paintedType);
+const paintedNodes = new Map();
+const textScrollers = Array.from(recordCard.querySelectorAll('.specimen-columns section'));
+const paintSurfaces = [...typographyRoots, ...textScrollers].map(root => {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'archive-type-paint';
+  canvas.setAttribute('aria-hidden', 'true');
+  canvas.hidden = true;
+  const motionCanvas = canvas.cloneNode();
+  root.append(canvas, motionCanvas);
+  return { root, canvas, motionCanvas, nodes: [], glyphs: [], scrolls: textScrollers.includes(root) };
+});
+let paintFrame;
+
+function prepareArchivePaint() {
+  if (!paintedType) return;
+  paintedType.clear();
+  paintedNodes.clear();
+  for (const surface of paintSurfaces) {
+    surface.nodes = [];
+    const walker = document.createTreeWalker(surface.root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        const scroller = parent.closest('.specimen-columns section');
+        return /\S/.test(node.data) && !parent.closest('meter, .specimen-columns p, .specimen-columns dd, #specimen-note p, .family-note p')
+          && (!scroller || scroller === surface.root)
+          ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      node.parentElement.classList.add('archive-painted-text');
+      const visibility = document.createRange();
+      visibility.selectNodeContents(node);
+      paintedType.add(visibility);
+      const entry = { node, visible: node.length };
+      paintedNodes.set(node, entry);
+      surface.nodes.push(entry);
+    }
+  }
+  measureArchivePaint();
+}
+
+function measureArchivePaint() {
+  if (!paintedType) return;
+  const scale = Math.min(devicePixelRatio || 1, 2);
+  for (const { canvas, motionCanvas } of paintSurfaces) canvas.hidden = motionCanvas.hidden = true;
+  for (const surface of paintSurfaces) {
+    const { root, canvas, motionCanvas } = surface;
+    const bounds = root.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) continue;
+    const width = root.clientWidth || bounds.width;
+    const height = surface.scrolls ? root.scrollHeight : bounds.height;
+    canvas.width = Math.ceil(width * scale);
+    canvas.height = Math.ceil(height * scale);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    canvas.hidden = false;
+    motionCanvas.width = canvas.width;
+    motionCanvas.height = canvas.height;
+    motionCanvas.style.width = canvas.style.width;
+    motionCanvas.style.height = canvas.style.height;
+    surface.scale = scale;
+    surface.glyphs = [];
+    const range = document.createRange();
+    for (const [line, entry] of surface.nodes.entries()) {
+      const { node } = entry;
+      const parent = node.parentElement;
+      if (!parent?.getClientRects().length) continue;
+      const style = getComputedStyle(parent);
+      const panelText = Boolean(parent.closest('.specimen-columns section'));
+      const heading = Boolean(parent.closest('h2, h3, dt, .specimen-id'));
+      let seed = line * 5 + node.data.length;
+      for (let index = 0; index < node.length; index++) {
+        const letter = node.data[index];
+        if (/\s/.test(letter)) continue;
+        range.setStart(node, index);
+        range.setEnd(node, index + 1);
+        const rect = range.getBoundingClientRect();
+        if (!rect.width || !rect.height) continue;
+        const [face, weight] = parent.id === 'specimen-count' ? ['Arial', 400] : faces[seed % faces.length];
+        const font = /[A-Za-z0-9]/.test(letter) ? weight + ' ' + style.fontSize + ' "' + face + '", Georgia, serif' :
+          style.fontWeight + ' ' + style.fontSize + ' ' + style.fontFamily;
+        surface.glyphs.push({
+          entry, index, letter, font, panelText, heading, color: style.color,
+          x: rect.left - bounds.left - root.clientLeft + (surface.scrolls ? root.scrollLeft : 0) + rect.width / 2,
+          y: rect.top - bounds.top - root.clientTop + (surface.scrolls ? root.scrollTop : 0) + rect.height * .51 + ((seed % 5) - 2) * .32,
+          width: rect.width,
+        });
+        seed++;
+      }
+    }
+    surface.headings = surface.glyphs.filter(glyph => glyph.heading);
+    surface.staticGlyphs = surface.glyphs.filter(glyph => !glyph.heading);
+    motionCanvas.hidden = !surface.headings.length;
+  }
+  drawArchivePaint();
+}
+
+function drawPaintGlyphs(pen, glyphs, viewport) {
+  pen.textAlign = 'center';
+  pen.textBaseline = 'middle';
+  const tick = Math.floor(performance.now() / 110);
+  for (const glyph of glyphs) {
+    if (glyph.index >= glyph.entry.visible) continue;
+    if (viewport && (glyph.x < viewport.left || glyph.x > viewport.right || glyph.y < viewport.top || glyph.y > viewport.bottom)) continue;
+    pen.font = glyph.font;
+    const brightInLens = viewport && glyph.panelText && !glyph.heading;
+    pen.fillStyle = brightInLens ? '#000' : glyph.color;
+    const tremble = glyph.heading && !reduceMotion.matches;
+    const beat = tick * 2.39 + glyph.index * .71 + glyph.y * .031;
+    const x = glyph.x + (tremble ? Math.sin(beat) * .36 : 0);
+    const y = glyph.y + (tremble ? Math.cos(beat * .87) * .43 : 0);
+    pen.fillText(glyph.letter, x, y, glyph.width);
+    if (brightInLens || glyph.heading) {
+      pen.strokeStyle = pen.fillStyle;
+      pen.lineWidth = glyph.heading ? .64 : .24;
+      pen.strokeText(glyph.letter, x, y, glyph.width);
+    }
+  }
+}
+
+function drawPaintLayer(canvas, glyphs, scale) {
+  if (canvas.hidden) return;
+  const pen = canvas.getContext('2d');
+  pen.setTransform(scale, 0, 0, scale, 0, 0);
+  pen.clearRect(0, 0, canvas.width / scale, canvas.height / scale);
+  drawPaintGlyphs(pen, glyphs);
+}
+
+function drawArchivePaint(headingsOnly = false) {
+  for (const { canvas, motionCanvas, scale, staticGlyphs, headings } of paintSurfaces) {
+    if (!headingsOnly) drawPaintLayer(canvas, staticGlyphs, scale);
+    drawPaintLayer(motionCanvas, headings, scale);
+  }
+  if (lensSource) drawLensType();
+}
+
+let lastHeadingFrame = 0;
+function animateHeadings(now) {
+  if (currentArchive && !document.hidden && !reduceMotion.matches && !activeDecodes.size && now - lastHeadingFrame >= 110) {
+    lastHeadingFrame = now;
+    drawArchivePaint(true);
+  }
+  requestAnimationFrame(animateHeadings);
+}
+
+function queueArchivePaint() {
+  if (paintFrame !== undefined) return;
+  paintFrame = requestAnimationFrame(() => {
+    paintFrame = undefined;
+    measureArchivePaint();
+  });
+}
+window.addEventListener('resize', queueArchivePaint);
+new ResizeObserver(queueArchivePaint).observe(recordCard);
+Promise.allSettled(faces.map(([face, weight]) => document.fonts.load(weight + ' 16px "' + face + '"'))).then(queueArchivePaint);
+
+const lens = document.createElement('div');
+lens.className = 'archive-lens';
+lens.hidden = true;
+lens.inert = true;
+lens.setAttribute('aria-hidden', 'true');
+const lensSurface = document.createElement('div');
+lensSurface.className = 'archive-lens-surface';
+lens.append(lensSurface);
+document.body.append(lens);
+const lensInput = matchMedia('(hover: hover) and (pointer: fine)');
+const lensZoom = 1.53;
+let lensSource;
+let lensCopy;
+let lensType;
+let lensPoint;
+
+let lensHideTimer;
+function hideLens(immediately = false) {
+  document.body.classList.remove('archive-lens-active');
+  lens.classList.remove('is-visible');
+  if (lens.hidden) return;
+  const finish = () => {
+    lens.hidden = true;
+    lensSource = lensCopy = lensPoint = lensType = undefined;
+    lensSurface.replaceChildren();
+  };
+  clearTimeout(lensHideTimer);
+  if (immediately === true || reduceMotion.matches) finish();
+  else lensHideTimer = setTimeout(finish, 200);
+}
+
+function copyLensSource(source) {
+  lensSource = source;
+  lensCopy = source.cloneNode(true);
+  lensCopy.removeAttribute('id');
+  lensCopy.classList.remove('archive-is-typing');
+  lensCopy.querySelectorAll('.archive-type-paint').forEach(canvas => canvas.remove());
+  for (const element of lensCopy.querySelectorAll('[id]')) element.removeAttribute('id');
+  lensCopy.classList.add('archive-lens-copy');
+  lensType = document.createElement('canvas');
+  lensType.className = 'archive-lens-type';
+  if (paintedType) lensCopy.classList.add('archive-lens-painted');
+  lensSurface.replaceChildren(lensCopy, lensType);
+}
+
+function drawLensType() {
+  if (!paintedType || !lensType || !lensPoint) return;
+  const size = lens.clientWidth;
+  const scale = Math.min((devicePixelRatio || 1) * 1.2, 3);
+  const pixelSize = Math.ceil(size * scale);
+  if (lensType.width !== pixelSize || lensType.height !== pixelSize) {
+    lensType.width = lensType.height = pixelSize;
+  }
+  const ink = lensType.getContext('2d');
+  ink.setTransform(1, 0, 0, 1, 0, 0);
+  ink.clearRect(0, 0, pixelSize, pixelSize);
+  for (const source of paintSurfaces) {
+    if (source.canvas.hidden || source.root !== lensSource && !lensSource.contains(source.root)) continue;
+    const bounds = source.root.getBoundingClientRect();
+    const viewX = size / 2 + (bounds.left + source.root.clientLeft - lensPoint.x) * lensZoom;
+    const viewY = size / 2 + (bounds.top + source.root.clientTop - lensPoint.y) * lensZoom;
+    const offsetX = viewX - (source.scrolls ? source.root.scrollLeft * lensZoom : 0);
+    const offsetY = viewY - (source.scrolls ? source.root.scrollTop * lensZoom : 0);
+    ink.save();
+    if (source.scrolls) {
+      ink.beginPath();
+      ink.rect(viewX * scale, viewY * scale, source.root.clientWidth * lensZoom * scale, source.root.clientHeight * lensZoom * scale);
+      ink.clip();
+    }
+    ink.setTransform(scale * lensZoom, 0, 0, scale * lensZoom, offsetX * scale, offsetY * scale);
+    const margin = 30;
+    drawPaintGlyphs(ink, source.glyphs, {
+      left: -offsetX / lensZoom - margin, right: (size - offsetX) / lensZoom + margin,
+      top: -offsetY / lensZoom - margin, bottom: (size - offsetY) / lensZoom + margin,
+    });
+    ink.restore();
+  }
+}
+
+function positionLens() {
+  if (!lensSource || !lensPoint) return;
+  const bounds = lensSource.getBoundingClientRect();
+  const size = lens.clientWidth;
+  const { x, y } = lensPoint;
+  lens.style.left = x - size / 2 + 'px';
+  lens.style.top = y - size / 2 + 'px';
+  lensCopy.style.width = bounds.width + 'px';
+  lensCopy.style.height = bounds.height + 'px';
+  lensCopy.style.transform = 'translate(' + (size / 2 + (bounds.left - x) * lensZoom) + 'px,' +
+    (size / 2 + (bounds.top - y) * lensZoom) + 'px) scale(' + lensZoom + ')';
+  drawLensType();
+  const scrollers = '.specimen-columns section, .specimen-note';
+  const copies = lensCopy.querySelectorAll(scrollers);
+  lensSource.querySelectorAll(scrollers).forEach((section, index) => { copies[index].scrollTop = section.scrollTop; });
+}
+
+stage.addEventListener('pointermove', event => {
+  if (archiveTransition || activeDecodes.size || !lensInput.matches || event.pointerType !== 'mouse' || event.buttons) {
+    if (lensSource) hideLens();
+    return;
+  }
+  const within = element => {
+    const box = element.getBoundingClientRect();
+    return event.clientX >= box.left && event.clientX <= box.right &&
+      event.clientY >= box.top && event.clientY <= box.bottom;
+  };
+  const source = within(distribution) ? distribution :
+    within(recordCard) ? recordCard : null;
+  if (!source) {
+    if (lens.classList.contains('is-visible')) hideLens();
+    return;
+  }
+  if (source !== lensSource) copyLensSource(source);
+  lensPoint = { x: event.clientX, y: event.clientY };
+  clearTimeout(lensHideTimer);
+  if (lens.hidden) {
+    lens.hidden = false;
+    lens.getBoundingClientRect();
+  }
+  lens.classList.add('is-visible');
+  document.body.classList.add('archive-lens-active');
+  positionLens();
+});
+stage.addEventListener('pointerleave', hideLens);
+stage.addEventListener('pointerdown', hideLens, true);
+recordCard.addEventListener('scroll', positionLens, true);
+window.addEventListener('scroll', positionLens, { passive: true });
+window.addEventListener('resize', positionLens);
+
+function showArchiveGraphics(archiveId) {
+  for (const sites of document.querySelectorAll("[data-archive-sites]")) {
+    sites.style.display = sites.dataset.archiveSites === archiveId ? "" : "none";
+  }
+}
+showArchiveGraphics("001");
+const initialSpecimen = items.findIndex(item => item.key === 'school');
+function waitForFirstModel() {
+  return new Promise(resolve => {
+    function finish() {
+      clearTimeout(timeout);
+      viewer.removeEventListener('load', finish);
+      viewer.removeEventListener('error', finish);
+      resolve();
+    }
+    const timeout = setTimeout(finish, 2400);
+    viewer.addEventListener('load', finish);
+    viewer.addEventListener('error', finish);
+  });
+}
+
+function addIntakeToken(number) {
+  const ball = document.createElement('button');
+  ball.type = 'button';
+  ball.className = 'notes-dot';
+  ball.dataset.archive = number;
+  ball.dataset.label = archiveGlyph(number);
+  ball.style.setProperty('--bob', (4.23 + .43 * (number - 1)) + 's');
+  ball.style.setProperty('--delay', (-.7 * number) + 's');
+  ball.setAttribute('aria-label', 'Select archive R-' + archiveNumber(number));
+  archiveTray.querySelector('.tray-oval').before(ball);
+  dockMotionParts.set(String(number), ball);
+  bindArchiveBall(ball);
+  return ball;
+}
+
+function setIntakeAddress(number) {
+  const url = new URL(location.href);
+  for (const key of ['home', 'archive', 'dock', 'released', 'specimen']) url.searchParams.delete(key);
+  url.searchParams.set(number ? 'archive' : 'home', number || 1);
+  try { history.replaceState(null, '', url); } catch { /* Local previews can restrict URL updates. */ }
+}
+
+function animateIntakeGrid() {
+  if (archiveMotion.matches) return Promise.resolve();
+  const animations = [...intakeScreen.querySelectorAll('.intake-panel, .intake-information')].map((panel, index) => {
+    const closed = { opacity: 0, transform: 'translateX(' + (index === 0 ? '-2%' : '2%') + ')' };
+    const open = { opacity: 1, transform: 'translateX(0)' };
+    return panel.animate([open, closed], {
+      duration: 570, delay: (3 - index) * 65,
+      easing: 'cubic-bezier(.25,.62,.28,1)', fill: 'both',
+    });
+  });
+  return Promise.allSettled(animations.map(animation => animation.finished)).then(() => animations);
+}
+
+async function slideIntakeGridIn() {
+  const panels = [...intakeScreen.querySelectorAll('.intake-panel, .intake-information')];
+  const animations = panels.map(panel => {
+    const side = panel.classList.contains('intake-panel-left') ? -1 : 1;
+    return panel.animate([
+      { visibility: 'visible', transform: 'translateX(' + (side * 105) + '%) scaleX(.94)' },
+      { visibility: 'visible', transform: 'translateX(' + (side * -1.4) + '%) scaleX(1.012)', offset: .82 },
+      { visibility: 'visible', transform: 'translateX(0) scaleX(1)' },
+    ], { duration: 680, easing: 'cubic-bezier(.22,.64,.3,1)', fill: 'both' });
+  });
+  await Promise.allSettled(animations.map(animation => animation.finished));
+  return animations;
+}
+
+function expandIntakeGround(from) {
+  const ground = intakeScreen.querySelector('.intake-ground');
+  const to = ground.getBoundingClientRect();
+  const x = from.left + from.width / 2 - to.left - to.width / 2;
+  const y = from.top + from.height / 2 - to.top - to.height / 2;
+  return ground.animate([
+    { transform: 'translate(' + x + 'px,' + y + 'px) scale(' + from.width / to.width + ',' + from.height / to.height + ')' },
+    { transform: 'none' },
+  ], { duration: 1200, easing: 'cubic-bezier(.23,.72,.25,1)', fill: 'both' });
+}
+
+async function moveIntakeDock(destination) {
+  if (archiveMotion.matches) {
+    destination.append(archiveDock);
+    return;
+  }
+  const parts = [...dockMotionParts].filter(([, element]) => !element.classList.contains('is-dragged'));
+  const fromIntake = archiveDock.parentElement === intakeDockSlot;
+  const origins = parts.map(([, element]) => element.getBoundingClientRect());
+  archiveDock.classList.add('dock-in-motion');
+  destination.append(archiveDock);
+  const overlay = document.createElement('div');
+  overlay.className = 'dock-motion-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.append(overlay);
+  const options = { duration: fromIntake ? 780 : 1320, easing: 'cubic-bezier(.23,.72,.25,1)', fill: 'both' };
+  const animations = [];
+  try {
+    parts.forEach(([key, element], index) => {
+      const from = origins[index];
+      const to = element.getBoundingClientRect();
+      if (!from.width || !to.width || !from.height || !to.height) return;
+      const style = getComputedStyle(element);
+      const part = document.createElement('div');
+      part.className = 'dock-motion-part';
+      Object.assign(part.style, {
+        left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px',
+        color: style.color, font: style.font, borderRadius: style.borderRadius,
+      });
+      if (key !== 'tray') part.style.background = style.background;
+      if (key === 'mouth' || key === 'mark') part.textContent = element.textContent;
+      if (key === 'tray') {
+        const oval = element.querySelector('.tray-oval').cloneNode();
+        const portrait = '0%';
+        const landscape = '7% 4%';
+        part.classList.add('dock-shared-tray');
+        part.append(oval);
+        animations.push(oval.animate([
+          { inset: fromIntake ? portrait : landscape, transform: 'rotate(0deg)' },
+          { inset: '3.5% 2%', transform: 'rotate(' + (fromIntake ? '-8' : '8') + 'deg)' },
+          { inset: fromIntake ? landscape : portrait, transform: 'rotate(0deg)' },
+        ], options));
+      }
+      overlay.append(part);
+      const x = from.left + from.width / 2 - to.left - to.width / 2;
+      const y = from.top + from.height / 2 - to.top - to.height / 2;
+      const scale = key === 'tray' ? from.width / to.width + ',' + from.height / to.height : from.width / to.width;
+      animations.push(part.animate([
+        { transform: 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')' },
+        { transform: 'translate(0,0) scale(1)' },
+      ], options));
+    });
+    await Promise.allSettled(animations.map(animation => animation.finished));
+  } finally {
+    overlay.remove();
+    archiveDock.classList.remove('dock-in-motion');
+  }
+}
+
+function showIntake() {
+  currentArchive = 0;
+  archiveDock.dataset.archive = '0';
+  document.title = 'Unclassified Human Objects';
+  document.documentElement.classList.add('intake-view');
+  intakeScreen.hidden = false;
+  stage.inert = true;
+}
+
+async function enterArchiveFromIntake(number, ball, ghost, point, mouth) {
+  setIntakeInformation(false);
+  const root = document.documentElement;
+  let grid;
+  try {
+    const ready = waitForFirstModel();
+    configurePreviewArchive(number);
+    archiveMouth.classList.add('is-swallowing');
+    await absorbArchiveBall(ghost, point, mouth, 520).catch(() => {});
+    ghost.remove();
+    archiveMouth.classList.remove('is-swallowing');
+    archiveMouth.textContent = archiveGlyph(number);
+    dockMotionParts.delete(String(number));
+    ball.remove();
+    intakeScreen.inert = true;
+    root.classList.add('dock-shared-scene', 'intake-crossing');
+    document.body.classList.add('dock-exchanging');
+    stage.inert = false;
+    armBall(undefined);
+    const gridMotion = animateIntakeGrid();
+    await moveIntakeDock(stage);
+    grid = await gridMotion;
+    intakeScreen.hidden = true;
+    root.classList.remove('intake-view');
+    await ready;
+    setIntakeAddress(number);
+    prepareArchivePaint();
+    pulseRecord();
+  } finally {
+    grid?.forEach(animation => animation.cancel());
+    root.classList.remove('dock-shared-scene', 'intake-crossing');
+    document.body.classList.remove('dock-exchanging');
+    archiveTransition = false;
+  }
+}
+
+async function returnToIntake() {
+  const number = currentArchive;
+  const root = document.documentElement;
+  archiveTransition = true;
+  hideLens(true);
+  root.classList.add('dock-shared-scene');
+  document.body.classList.add('dock-exchanging');
+  let grid;
+  let ground;
+  const motion = !archiveMotion.matches;
+  try {
+    if (motion) await new Promise(resolve => setTimeout(resolve, 390));
+    const from = archiveTray.getBoundingClientRect();
+    if (motion) root.classList.add('dock-returning', 'intake-crossing');
+    showIntake();
+    if (motion) ground = expandIntakeGround(from);
+    await moveIntakeDock(intakeDockSlot);
+    const ball = addIntakeToken(number);
+    if (motion) {
+      ball.classList.add('is-dragged');
+      const ghost = makeGhost(ball.offsetWidth);
+      ghost.dataset.label = archiveGlyph(number);
+      const lip = centerOf(archiveMouth);
+      ghost.style.left = lip.x + 'px';
+      ghost.style.top = lip.y + 'px';
+      archiveMouth.textContent = '';
+      const target = centerOf(ball);
+      await playFusion(ghost, ghost.animate([
+        { left: lip.x + 'px', top: lip.y + 'px', transform: 'translate(-50%, -50%) scale(.1)' },
+        { offset: .42, left: (lip.x * .65 + target.x * .35) + 'px',
+          top: (lip.y * .65 + target.y * .35) + 'px', transform: 'translate(-50%, -50%) scale(.86)' },
+        { left: target.x + 'px', top: target.y + 'px', transform: 'translate(-50%, -50%) scale(1)' },
+      ], { duration: 680, easing: 'cubic-bezier(.35,.12,.42,1)', fill: 'forwards' })).catch(() => {});
+      ghost.remove();
+      ball.classList.remove('is-dragged');
+      await new Promise(resolve => setTimeout(resolve, 180));
+      grid = await slideIntakeGridIn();
+    } else {
+      archiveMouth.textContent = '';
+    }
+    armBall(undefined);
+    setIntakeAddress(0);
+  } finally {
+    root.classList.remove('dock-returning');
+    grid?.forEach(animation => animation.cancel());
+    ground?.cancel();
+    intakeScreen.inert = false;
+    root.classList.remove('dock-shared-scene', 'intake-crossing');
+    document.body.classList.remove('dock-exchanging');
+    archiveTransition = false;
+  }
+}
+
+const intakeInformation = intakeScreen.querySelector('.intake-information');
+const intakeIntroduction = intakeInformation.querySelector('.intake-introduction');
+let intakeCopyTimer;
+let intakeInfoHovered = false;
+
+function setIntakeInformation(open) {
+  clearTimeout(intakeCopyTimer);
+  intakeScreen.classList.toggle('is-information-open', open);
+  if (!open) {
+    activeDecodes.get(intakeIntroduction)?.();
+    intakeInformation.classList.remove('is-copy-visible');
+    intakeIntroduction.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  function revealIntroduction() {
+    if (currentArchive || archiveTransition) return;
+    intakeInformation.classList.add('is-copy-visible');
+    intakeIntroduction.removeAttribute('aria-hidden');
+    decodeText(intakeIntroduction);
+  }
+  if (archiveMotion.matches) revealIntroduction();
+  else intakeCopyTimer = setTimeout(revealIntroduction, 170);
+}
+
+intakeInformation.addEventListener('pointerenter', event => {
+  if (event.pointerType === 'touch') return;
+  intakeInfoHovered = true;
+  if (!archiveTransition) setIntakeInformation(true);
+});
+intakeInformation.addEventListener('pointerleave', () => {
+  intakeInfoHovered = false;
+  if (!intakeInformation.matches(':focus-visible')) setIntakeInformation(false);
+});
+intakeInformation.addEventListener('focus', () => {
+  if (!archiveTransition) setIntakeInformation(true);
+});
+intakeInformation.addEventListener('blur', () => {
+  if (!intakeInfoHovered) setIntakeInformation(false);
+});
+intakeInformation.addEventListener('keydown', event => {
+  if (event.key === 'Escape') setIntakeInformation(false);
+});
+
+const requestedArchive = Number(dockMotionQuery.get('archive'));
+const firstArchive = Object.hasOwn(previewArchives, requestedArchive) ? requestedArchive : 1;
+function loadInitialArchive(showText) {
+  loadArchiveAssets();
+  if (firstArchive !== 1) {
+    const ball = dockMotionParts.get(String(firstArchive));
+    dockMotionParts.delete(String(firstArchive));
+    ball.dataset.archive = '1';
+    ball.dataset.label = archiveGlyph(1);
+    ball.setAttribute('aria-label', 'Select archive R-001');
+    dockMotionParts.set('1', ball);
+    archiveMouth.textContent = archiveGlyph(firstArchive);
+    configurePreviewArchive(firstArchive, showText);
+  } else {
+    selectItem(initialSpecimen, showText);
+  }
+}
+
+if (startOnIntake) {
+  showIntake();
+  intakeDockSlot.append(archiveDock);
+  addIntakeToken(1);
+  archiveMouth.textContent = '';
+  armBall(undefined);
+  intakeScreen.inert = false;
+  document.documentElement.classList.remove('dock-pending', 'intake-boot');
+  document.querySelector('#dock-load-preview')?.remove();
+  requestAnimationFrame(animateHeadings);
+} else if (dockMotionSource) {
+  const ready = waitForFirstModel();
+  loadInitialArchive(false);
+  void arriveThroughDock(ready).finally(() => {
+    prepareArchivePaint();
+    pulseRecord();
+    requestAnimationFrame(animateHeadings);
+  });
+} else {
+  loadInitialArchive(true);
+  requestAnimationFrame(animateHeadings);
+}
+
+for (const image of intakeScreen.querySelectorAll('.intake-gold')) {
+  image.decode().catch(() => {});
+}
+
+for (const panel of document.querySelectorAll('.intake-panel')) {
+  const panelStyle = getComputedStyle(panel);
+  const columns = Number(panelStyle.getPropertyValue('--panel-columns'));
+  const rows = Number(panelStyle.getPropertyValue('--panel-rows'));
+  let active;
+  let pointerCell;
+
+  function shuffleSlots() {
+    const cells = Array.from(panel.querySelectorAll('.intake-cell'));
+    const slots = cells.map(cell => cell.style.gridArea);
+    for (let i = cells.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
+    cells.forEach((cell, index) => {
+      cell.style.gridArea = slots[index];
+      panel.append(cell);
+    });
+  }
+
+  function weights(count) {
+    return Array.from({ length: count }, () => .48 + Math.random() * 1.25);
+  }
+
+  function sliceShare(values, start, end) {
+    return values.slice(start, end).reduce((sum, weight) => sum + weight, 0) /
+      values.reduce((sum, weight) => sum + weight, 0);
+  }
+
+  function tracks(values, start, end, fraction) {
+    const share = sliceShare(values, start, end);
+    return values.map((value, index) => {
+      const weight = share === 1 ? value : index >= start && index < end
+        ? value * fraction / share : value * (1 - fraction) / (1 - share);
+      return 'minmax(0, ' + weight.toFixed(6) + 'fr)';
+    }).join(' ');
+  }
+
+  shuffleSlots();
+  let restingColumns = weights(columns);
+  let restingRows = weights(rows);
+  let movingColumns = restingColumns;
+  let movingRows = restingRows;
+
+  function layout() {
+    if (!active) {
+      panel.style.gridTemplateColumns = tracks(restingColumns, 0, columns, 1);
+      panel.style.gridTemplateRows = tracks(restingRows, 0, rows, 1);
+      return;
+    }
+    const [top, left, bottom, right] = active.style.gridArea.split('/').map(value => Number(value) - 1);
+    const width = panel.clientWidth;
+    const height = panel.clientHeight;
+    if (!width || !height) return;
+    const fullWidth = right - left === columns;
+    const fullHeight = bottom - top === rows;
+    const restWidth = width * sliceShare(restingColumns, left, right);
+    const restHeight = height * sliceShare(restingRows, top, bottom);
+    const square = Math.min(fullWidth ? width : width * .83, fullHeight ? height : height * .83,
+      fullWidth ? width : fullHeight ? height : Math.max(restWidth, restHeight));
+    panel.style.gridTemplateColumns = tracks(movingColumns, left, right, square / width);
+    panel.style.gridTemplateRows = tracks(movingRows, top, bottom, square / height);
+  }
+
+  function select(cell) {
+    if (cell === active) return;
+    active?.classList.remove('is-revealed', 'is-inspected');
+    active = cell;
+    active?.classList.add('is-inspected', 'is-revealed');
+    if (cell) {
+      movingColumns = weights(columns);
+      movingRows = weights(rows);
+    } else {
+      restingColumns = weights(columns);
+      restingRows = weights(rows);
+    }
+    layout();
+  }
+
+  function update() {
+    select(panel.querySelector('.intake-cell:focus-visible') || pointerCell);
+  }
+  panel.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch') return;
+    pointerCell = event.target.closest('.intake-cell') || undefined;
+    update();
+  });
+  panel.addEventListener('pointerleave', () => {
+    pointerCell = undefined;
+    update();
+  });
+  panel.addEventListener('focusin', update);
+  panel.addEventListener('focusout', () => requestAnimationFrame(update));
+  layout();
+  new ResizeObserver(layout).observe(panel);
+}
+
+const idleGalleryCells = Array.from(document.querySelectorAll('.intake-cell'));
+let previousFlicker;
+
+function scheduleGalleryFlicker() {
+  const delay = 2200 + Math.random() * 3000;
+  setTimeout(async () => {
+    if (!archiveMotion.matches && !document.hidden && !archiveTransition && !currentArchive &&
+        !document.body.classList.contains('dock-arriving') &&
+        !document.querySelector('.intake-cell.is-inspected')) {
+      const candidates = idleGalleryCells.filter(cell =>
+        cell !== previousFlicker && Math.min(cell.clientWidth, cell.clientHeight) >= 60);
+      const cell = candidates[Math.floor(Math.random() * candidates.length)];
+      if (cell) {
+        previousFlicker = cell;
+        await flickerArtwork(cell);
+      }
+    }
+    scheduleGalleryFlicker();
+  }, delay);
+}
+
+async function flickerArtwork(cell) {
+  const source = cell.querySelector('svg.intake-black');
+  if (!source || typeof source.animate !== 'function') return;
+  const height = cell.clientHeight;
+  const size = Math.min(cell.clientWidth, height);
+  const layers = [];
+  const animations = [];
+  const direction = Math.random() < .5 ? -1 : 1;
+  try {
+    for (const [position, thickness, offset] of [[.31, .12, .12], [.57, .09, -.09]]) {
+      const top = (height - size) / 2 + size * position;
+      const bandHeight = size * thickness;
+      const shift = Math.min(36, Math.max(12, size * Math.abs(offset))) * Math.sign(offset) * direction;
+      const band = document.createElement('span');
+      band.className = 'intake-flicker-band';
+      band.setAttribute('aria-hidden', 'true');
+      band.style.clipPath = 'inset(' + top + 'px 0 ' + (height - top - bandHeight) + 'px)';
+      const copy = source.cloneNode(false);
+      copy.append(source.querySelector(':scope > image').cloneNode());
+      band.append(copy);
+      cell.append(band);
+      layers.push(band);
+      animations.push(copy.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(' + shift + 'px)', offset: .17 },
+        { transform: 'translateX(' + shift + 'px)', offset: .67 },
+        { transform: 'translateX(0)' },
+      ], { duration: 350 }).finished);
+    }
+    await Promise.allSettled(animations);
+  } finally {
+    for (const layer of layers) layer.remove();
+  }
+}
+scheduleGalleryFlicker();
+
+</script>
+</body>
+</html>
