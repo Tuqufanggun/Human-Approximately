@@ -5,8 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Unclassified Human Objects</title>
 <script>
-  const startOnIntake = !new URLSearchParams(location.search).has('archive');
-  if (startOnIntake) document.documentElement.classList.add('intake-view', 'intake-boot');
+  history.scrollRestoration = 'manual';
+  const reloadToHomepage = performance.getEntriesByType('navigation')[0]?.type === 'reload';
+  if (reloadToHomepage) {
+    const url = new URL(location.href);
+    for (const key of ['archive', 'home', 'dock', 'released', 'specimen']) url.searchParams.delete(key);
+    url.hash = '';
+    history.replaceState(history.state, '', url);
+  }
+  const landingQuery = new URLSearchParams(location.search);
+  const startOnIntake = !landingQuery.has('archive');
+  const startOnVoyager = startOnIntake && landingQuery.get('page') !== 'earth' && !landingQuery.has('home');
+  if (startOnIntake) document.documentElement.classList.add('intake-view', 'intake-boot', 'intake-browsing');
+  if (startOnVoyager) document.documentElement.classList.add('voyager-entry');
 </script>
 <style>
 *{box-sizing:border-box}
@@ -625,6 +636,109 @@ model-viewer::part(default-progress-bar){display:none}
 .intake-view:not(.intake-crossing) :is(.specimen-columns,.controls nav){background-image:none}
 .intake-view:not(.intake-crossing) .controls nav::after{mask:none}
 @media(max-width:620px){.intake-view body{height:max(630px,100svh)}}
+#homepage{display:none;background:#181817;overflow:clip}
+#path-screen{display:none;min-height:110svh;background:#000;overflow:clip;padding-bottom:10vw}
+.intake-browsing.voyager-entry #path-screen{display:block}
+.voyager-entry #intake-screen{display:none}
+#homepage{min-height:100svh}
+@property --path-seen{syntax:"<percentage>";inherits:true;initial-value:0%}
+.path-art{position:relative;isolation:isolate;width:100%;aspect-ratio:2200/5131}
+.path-mesh{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.path-layer{position:absolute;pointer-events:none}
+.path-layer img{display:block;width:100%;height:100%}
+.path-earth{z-index:1;mix-blend-mode:overlay}
+.path-earth img{opacity:.88;clip-path:circle(39.1% at 50% 50%)}
+.earth-entry{visibility:hidden}
+.path-orbits.is-orbit-ready .earth-entry{visibility:visible}
+.earth-entry circle{cursor:pointer;pointer-events:all;stroke:transparent;stroke-width:3;transition:stroke .22s ease}
+.earth-entry:hover circle,.earth-entry:focus-visible circle{stroke:#b6a36a}
+#orbit-particles canvas{filter:brightness(1.26)}
+.path-reactive{pointer-events:auto}
+.path-orbits{position:absolute;pointer-events:none;overflow:visible}
+.path-orbits{inset:0;width:100%;height:100%;--path-depth:var(--orbit-drift)}
+
+.path-art{--orbit-drift:.04}
+.path-mouse-orbit{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.78}
+.path-earth{--path-depth:var(--orbit-drift)}
+@media(prefers-reduced-motion:no-preference){
+  .path-layer img,.path-orbits{
+    translate:calc(var(--path-drift-x,0px) * var(--path-depth,1))
+      calc(var(--path-drift-y,0px) * var(--path-depth,1));
+  }
+  .path-layer img{transition:opacity .38s ease-out,translate .44s cubic-bezier(.22,.61,.36,1)}
+  .path-orbits{transition:translate .44s cubic-bezier(.22,.61,.36,1)}
+}
+
+.path-timeline{position:absolute;inset:0;z-index:3;pointer-events:none;margin:0;padding:0;list-style:none}
+.path-milestone{
+  position:absolute;top:var(--milestone-y);left:var(--milestone-x);width:max-content;max-width:min(40vw, calc(96% - var(--milestone-x)));
+  color:#c6b47c;text-shadow:0 1px 5px #000,0 0 12px #000;
+  font-size:clamp(12px,1.8vw,32px);line-height:1.12;letter-spacing:.04em;
+  opacity:0;transform:translateY(7px);transition:opacity .34s ease,transform .4s ease
+}
+.path-milestone.is-visible{opacity:1;transform:translateY(0)}
+.path-milestone span{display:block}
+.path-milestone .path-milestone-date{margin-bottom:.28em;font-size:.7em;letter-spacing:.12em}
+.path-milestone:last-child{left:50%;max-width:80vw;text-align:center;translate:-50% 0}
+@media(prefers-reduced-motion:reduce){.path-milestone{transition:none;transform:none}}
+@media(prefers-reduced-motion:no-preference){
+  .path-art.is-reveal-ready .path-layer:not(.is-revealed) img{opacity:0}
+  .path-art.is-reveal-ready .path-layer.path-trace img{
+    mask-image:linear-gradient(var(--path-angle,180deg),#000 calc(var(--path-seen,0%) - 4%),transparent var(--path-seen,0%))
+  }
+  .path-art.is-reveal-ready .path-trace-diagonal{transition:--path-seen .36s ease-out}
+  .path-art.is-reveal-ready .path-trace-diagonal img{--path-angle:205deg}
+  .path-reactive.is-revealed:hover{animation:path-hover .65s cubic-bezier(.22,.7,.3,1)}
+}
+@keyframes path-hover{0%,100%{transform:scale(1)} 27%{transform:scale(1.034)}}
+
+.earth-transition{position:fixed;inset:0;z-index:10000;overflow:hidden;touch-action:none}
+.earth-transition-dim{position:absolute;inset:0;background:#000;opacity:0}
+.earth-transition-disc{
+  position:absolute;left:var(--earth-x);top:var(--earth-y);
+  width:var(--earth-size);height:var(--earth-size);border-radius:50%;
+  background:#181817;box-shadow:inset 0 0 0 2px #b6a36a;
+  opacity:0;transform:translate(-50%,-50%)
+}
+#homepage{position:relative;isolation:isolate}
+.homepage-frame-wrap{width:142%;margin-inline:-21%;margin-top:-4vw;position:relative;z-index:2;pointer-events:none}
+.homepage-frame,.homepage-frame-hover{display:block;width:100%;height:auto}
+.homepage-frame-hover{position:absolute;inset:0;visibility:hidden}
+.homepage-return{position:absolute;inset:0;pointer-events:auto;cursor:pointer}
+.homepage-return-left{
+  clip-path:polygon(28% 3%,32% 4%,32% 8%,30% 13%,27% 17%,24% 21%,28% 28%,30% 36%,33% 47%,31% 55%,35% 64%,35% 72%,39% 76%,38% 81%,32% 84%,40% 90%,39% 96%,12% 96%,4% 89%,1% 76%,2% 58%,1% 42%,3% 29%,8% 20%,13% 14%,12% 10%,15% 6%,21% 5%)
+}
+.homepage-return-right{transform:scaleX(-1)}
+.homepage-frame-wrap[data-carving="waiting"] .homepage-frame{visibility:hidden}
+.homepage-frame,.homepage-frame-hover{mask-size:100% 100%;mask-repeat:no-repeat}
+.homepage-frame-wrap[data-effect] .homepage-frame-hover{visibility:visible}
+.homepage-frame-wrap[data-effect="left"] .homepage-frame-hover{clip-path:inset(0 50% 0 0)}
+.homepage-frame-wrap[data-effect="right"] .homepage-frame-hover{clip-path:inset(0 0 0 50%)}
+.homepage-arrivals :is(.homepage-detail,.homepage-figure){opacity:0}
+.homepage-arrivals .homepage-arrived{opacity:1}
+@media(prefers-reduced-motion:no-preference){
+  .homepage-arrivals :is(.homepage-detail,.homepage-figure){
+    translate:0 clamp(75px,10vw,150px);
+    transition:translate .65s cubic-bezier(.52,.03,.18,1),opacity .54s ease;
+    transition-delay:var(--home-beat,0ms)
+  }
+  .homepage-arrivals .homepage-arrived{translate:0 0}
+  .homepage-arrivals .homepage-departed{
+    translate:0 clamp(-150px,-10vw,-75px);
+    transition-timing-function:cubic-bezier(.54,.03,.69,.9),ease-in
+  }
+}
+.homepage-detail,.homepage-figure,.homepage-video{position:absolute;margin:0}
+.homepage-detail,.homepage-figure{
+  left:var(--home-x);top:var(--home-y);width:var(--home-width);height:auto
+}
+.homepage-detail{background:#404040}
+.homepage-figure{z-index:1}
+.homepage-video{top:58.3%;left:15.5%;width:69%}
+.homepage-video img{display:block;width:100%;height:auto}
+.intake-browsing:not(.voyager-entry) #homepage{display:flow-root}
+.intake-browsing body{height:auto;overflow:visible;background-color:#181817}
+.intake-browsing main{display:none}
+.intake-browsing #intake-screen{position:relative;inset:auto}
 .intake-view .archive-scene-piece{opacity:0;pointer-events:none}
 .intake-crossing #intake-screen,.intake-crossing .intake-dock{background:transparent;border-color:transparent}
 :root{--shared-tray-texture:url(a16e494b42c62cd4.jpg)}
@@ -695,6 +809,63 @@ model-viewer::part(default-progress-bar){display:none}
   document.body.append(preview);
 })();
 </script>
+<script src="planet-particles.js"></script>
+<section id="path-screen" aria-label="Voyager and Golden Record">
+  <div class="path-art">
+<canvas class="path-mesh" width="1100" height="2566" aria-hidden="true"></canvas>
+<div class="path-layer path-reactive path-far" data-focus="78.335" style="left:22.2273%;top:64.2370%;width:55.5455%;height:28.2011%"><img src="layer-1.png" width="1222" height="1447" alt="" loading="lazy"></div>
+<div class="path-layer path-trace path-far" data-focus="50" style="left:0;top:-3.5%;width:100%;height:107%"><img src="layer-2.png" width="2200" height="5131" alt="" ></div>
+<div class="path-layer path-far" data-focus="46.455" style="left:24.1364%;top:27.5580%;width:50.7273%;height:37.7899%"><img src="layer-3.png" width="1116" height="1939" alt="" ></div>
+<div class="path-layer path-reactive path-far" data-focus="78.125" style="left:12.5000%;top:73.3970%;width:75.0000%;height:9.4523%"><img src="layer-4.png" width="1650" height="485" alt="" loading="lazy"></div>
+<div class="path-layer path-reactive path-far" data-focus="62.295" style="left:23.1818%;top:52.1536%;width:22.5455%;height:20.2884%"><img src="layer-5.png" width="496" height="1041" alt="" loading="lazy"></div>
+<div class="path-layer path-reactive path-far" data-focus="58.96" style="left:52.3182%;top:52.1536%;width:19.6364%;height:13.6231%"><img src="layer-6.png" width="432" height="699" alt="" loading="lazy"></div>
+<div class="path-layer path-reactive path-far" data-focus="59.795" style="left:52.3182%;top:54.6482%;width:17.6818%;height:10.2904%"><img src="layer-7.png" width="389" height="528" alt="" loading="lazy"></div>
+<div class="path-layer path-reactive path-mid" data-focus="56.665" style="left:43.5909%;top:52.5629%;width:12.8182%;height:8.2050%"><img src="layer-8.png" width="282" height="421" alt="" loading="lazy"></div>
+<div class="path-layer path-far" data-focus="63.54" style="left:9.5909%;top:55.4863%;width:75.9545%;height:16.1177%"><img src="layer-9.png" width="1671" height="827" alt="" loading="lazy"></div>
+<div class="path-layer path-reactive path-trace path-mid" data-focus="27.1" style="left:45.5000%;top:25.0633%;width:9.0000%;height:29.4485%"><img src="layer-10.png" width="198" height="1511" alt="" ></div>
+<div class="path-layer path-far" data-focus="42.71" style="left:47.4545%;top:28.3960%;width:42.0000%;height:28.6299%"><img src="layer-11.png" width="924" height="1469" alt="" loading="lazy"></div>
+<div class="path-layer path-far" data-focus="45.0" style="left:8.6364%;top:32.5668%;width:41.9545%;height:24.8684%"><img src="layer-12.png" width="923" height="1276" alt="" loading="lazy"></div>
+<div class="path-layer path-earth path-mid" data-focus="86.455" style="left:30.9545%;top:77.5677%;width:38.0909%;height:17.7743%"><img src="layer-13.png" width="838" height="912" alt="" decoding="async"></div>
+<div class="path-layer path-reactive" data-focus="18.125" style="left:10.5455%;top:6.7238%;width:78.9091%;height:22.8026%"><img src="layer-14.png" width="1736" height="1170" alt="" ></div>
+<div class="path-layer path-trace path-trace-diagonal path-mid" data-focus="6.7" style="left:17.3636%;top:4.6580%;width:65.2727%;height:71.9353%"><img src="layer-15.png" width="1436" height="3691" alt="" ></div>
+<div class="path-layer path-reactive path-far" data-focus="21.25" style="left:27.0909%;top:5.4765%;width:41.0000%;height:31.5338%"><img src="layer-16.png" width="902" height="1618" alt="" ></div>
+<div class="path-layer path-reactive path-far" data-focus="6.045" style="left:42.5909%;top:0.0000%;width:14.8182%;height:12.4342%"><img src="layer-17.png" width="326" height="638" alt="" ></div>
+<div class="path-layer path-reactive" data-focus="17.5" style="left:38.7273%;top:13.8180%;width:20.5909%;height:7.3670%"><img src="layer-18.png" width="453" height="378" alt="" ></div>
+<div class="path-layer path-reactive path-mid" data-focus="74.375" style="left:37.7727%;top:71.3116%;width:10.8636%;height:6.1197%"><img src="layer-19.png" width="239" height="314" alt=""></div>
+<svg class="path-orbits" viewBox="0 0 2200 5131" preserveAspectRatio="none" role="group" aria-label="Gold particle Earth, Moon, Sun and planets"><foreignObject id="orbit-particles" x="0" y="3500" width="2200" height="1850" aria-hidden="true"><canvas xmlns="http://www.w3.org/1999/xhtml" width="1100" height="925" style="width:100%;height:100%;display:block"></canvas></foreignObject><a class="earth-entry" href="?page=earth" aria-label="Enter Human Approximately through Earth"><circle cx="1100" cy="4436" r="343" fill="transparent"/></a>
+    
+    </svg>
+    <canvas class="path-mouse-orbit" aria-hidden="true"></canvas>
+    <ol class="path-timeline" aria-label="Recovery timeline">
+      <li class="path-milestone" data-focus="15" style="--milestone-y:15%;--milestone-x:12%"><span class="path-milestone-date">00 SFR</span><span>FIRST RECOVERY</span></li>
+      <li class="path-milestone" data-focus="23" style="--milestone-y:23%;--milestone-x:66%"><span class="path-milestone-date">03 SFR</span><span>THE ENCODED DISC</span></li>
+      <li class="path-milestone" data-focus="34" style="--milestone-y:34%;--milestone-x:56%"><span class="path-milestone-date">07 SFR</span><span>FIRST HUMAN TRACES</span></li>
+      <li class="path-milestone" data-focus="46" style="--milestone-y:46%;--milestone-x:9%"><span class="path-milestone-date">11 SFR</span><span>A ROUTE IS IDENTIFIED</span></li>
+      <li class="path-milestone" data-focus="61" style="--milestone-y:61%;--milestone-x:65%"><span class="path-milestone-date">26 SFR</span><span>THE SOURCE SYSTEM</span></li>
+      <li class="path-milestone" data-focus="75" style="--milestone-y:75%;--milestone-x:9%"><span class="path-milestone-date">29 SFR</span><span>PRIMARY TRACE CONCENTRATION</span></li>
+      <li class="path-milestone" data-focus="86.45" style="--milestone-y:86.45%;--milestone-x:67%"><span class="path-milestone-date">31 SFR</span><span>HUMAN ORIGIN CONFIRMED</span></li>
+      <li class="path-milestone" data-focus="97" style="--milestone-y:97%;--milestone-x:50%"><span class="path-milestone-date">34 SFR</span><span>RESEARCH ORGANISATION ESTABLISHED</span></li>
+    </ol>
+  </div>
+</section>
+<section id="homepage" class="homepage-arrivals" aria-label="Human Approximately">
+  <div class="homepage-frame-wrap" data-carving="waiting">
+    <img class="homepage-frame" src="homepage-human-hover.png" width="600" height="680" alt="Two illustrated figures face one another from opposite edges of the page." fetchpriority="high">
+    <img class="homepage-frame-hover" src="homepage-human.png" width="1820" height="2064" alt="" decoding="async">
+    <a class="homepage-return homepage-return-left" href="?#voyager-end" aria-label="Return to the Earth at the end of the Voyager page"></a>
+    <a class="homepage-return homepage-return-left homepage-return-right" href="?#voyager-end" aria-label="Return to the Earth at the end of the Voyager page"></a>
+  </div>
+  <img class="homepage-detail" src="head.gif" width="2752" height="2256" alt="Head movement study" loading="lazy" style="--home-x:32.4%;--home-y:14.1%;--home-width:17.2%">
+  <img class="homepage-detail" src="neck.gif" width="2752" height="2064" alt="Neck and mouth movement study" loading="lazy" style="--home-x:52.9%;--home-y:17.9%;--home-width:12.4%">
+  <img class="homepage-detail" src="arm.gif" width="2752" height="2064" alt="Arm movement study" loading="lazy" style="--home-x:58.7%;--home-y:25.9%;--home-width:16.1%">
+  <img class="homepage-detail" src="hand.gif" width="2752" height="2064" alt="Hand movement study" loading="lazy" style="--home-x:59%;--home-y:36.1%;--home-width:15.8%">
+  <img class="homepage-detail" src="leg.gif" width="2752" height="2064" alt="Leg movement study" loading="lazy" style="--home-x:29.8%;--home-y:40.2%;--home-width:13.2%">
+  <img class="homepage-detail" src="foot.gif" width="2752" height="2064" alt="Foot movement study" loading="lazy" style="--home-x:34.4%;--home-y:47.1%;--home-width:13.6%">
+  <img class="homepage-figure" src="figure.png" width="2064" height="2752" alt="Full-length illustration of the figure" loading="lazy" style="--home-x:28.5%;--home-y:15.8%;--home-width:43%">
+  <figure class="homepage-video">
+    <img src="test-poster.jpg" width="3730" height="2064" alt="A seated figure framed by geometric projections" loading="lazy">
+  </figure>
+</section>
 <main>
 <svg class="stone stone-art" viewBox="0 0 2112 1188" aria-hidden="true">
 <defs>
@@ -1231,16 +1402,20 @@ function readSilhouette(pixels, width, height) {
   return leftEdge.concat(rightEdge.reverse());
 }
 
+function easeSilhouette(target, drawn, elapsed, reduced) {
+  const easing = reduced ? 1 : 1 - Math.exp(-Math.min(elapsed, 55) / 100);
+  return target.map((point, index) => {
+    const previous = drawn?.[index] ?? point;
+    return { x: previous.x + (point.x - previous.x) * easing, y: previous.y + (point.y - previous.y) * easing };
+  });
+}
+
 function drawSilhouette(now) {
   if (!scanLoaded) return;
   if (targetOutline) {
     const bounds = viewer.getBoundingClientRect();
     const stageBounds = stage.getBoundingClientRect();
-    const easing = reduceMotion.matches ? 1 : 1 - Math.exp(-Math.min(now - lastDraw, 55) / 100);
-    drawnOutline = targetOutline.map((point, index) => {
-      const previous = drawnOutline?.[index] ?? point;
-      return { x: previous.x + (point.x - previous.x) * easing, y: previous.y + (point.y - previous.y) * easing };
-    });
+    drawnOutline = easeSilhouette(targetOutline, drawnOutline, now - lastDraw, reduceMotion.matches);
     for (const layer of [scan, scanBack]) {
       layer.style.left = (bounds.left - stageBounds.left) + 'px';
       layer.style.top = (bounds.top - stageBounds.top) + 'px';
@@ -2422,6 +2597,7 @@ function addIntakeToken(number) {
 function setIntakeAddress(number) {
   const url = new URL(location.href);
   for (const key of ['home', 'archive', 'dock', 'released', 'specimen']) url.searchParams.delete(key);
+  url.searchParams.set('page', 'earth');
   url.searchParams.set(number ? 'archive' : 'home', number || 1);
   try { history.replaceState(null, '', url); } catch { /* Local previews can restrict URL updates. */ }
 }
@@ -2522,6 +2698,903 @@ async function moveIntakeDock(destination) {
   }
 }
 
+const pathScreen = document.querySelector('#path-screen');
+const pathArt = pathScreen.querySelector('.path-art');
+const orbitCanvas = pathScreen.querySelector('.path-orbits');
+const pathMilestones = [...pathArt.querySelectorAll('.path-milestone')];
+for (const label of pathArt.querySelectorAll('.path-milestone span')) {
+  const copy = label.textContent;
+  label.replaceChildren(...Array.from(copy, (character, index) => {
+    if (character === ' ') return document.createTextNode(' ');
+    const glyph = document.createElement('b');
+    const [face, weight] = faces[(index + copy.length) % faces.length];
+    glyph.style.fontFamily = '"' + face + '", Georgia, serif';
+    glyph.style.fontWeight = weight;
+    glyph.textContent = character;
+    return glyph;
+  }));
+}
+
+const pathLayers = [...pathScreen.querySelectorAll('.path-layer')];
+const pathTraces = pathLayers.filter(layer => layer.classList.contains('path-trace'));
+const earthLayer = pathLayers[12];
+pathLayers.forEach((layer, index) => {
+  if (layer === earthLayer) return;
+  const fraction = index / (pathLayers.length - 1);
+  layer.style.setProperty('--path-depth', (1.10 - fraction * 1.04).toFixed(3));
+});
+const arcLayer = pathLayers[14];
+const endpointLayer = pathLayers[18];
+let endpointQueued = false;
+
+window.addEventListener('pointermove', event => {
+  if (event.pointerType !== 'mouse' || archiveMotion.matches) return;
+  const bounds = pathScreen.getBoundingClientRect();
+  if (!bounds.height || event.clientY < bounds.top || event.clientY >= bounds.bottom) return;
+  const scale = Math.min(76, Math.max(34, window.innerWidth * .057));
+  pathScreen.style.setProperty('--path-drift-x', ((event.clientX / window.innerWidth * 2 - 1) * scale).toFixed(1) + 'px');
+  pathScreen.style.setProperty('--path-drift-y', ((event.clientY / window.innerHeight * 2 - 1) * scale * .88).toFixed(1) + 'px');
+}, { passive: true });
+function resetPathDrift() {
+  pathScreen.style.removeProperty('--path-drift-x');
+  pathScreen.style.removeProperty('--path-drift-y');
+}
+pathScreen.addEventListener('pointerleave', resetPathDrift);
+window.addEventListener('blur', resetPathDrift);
+const traceProgress = new WeakMap();
+let pathTraceFrame;
+function updatePathTraces() {
+  pathTraceFrame = undefined;
+  if (archiveMotion.matches || !document.documentElement.classList.contains('intake-browsing')) return;
+  const revealEdge = window.innerHeight * .94;
+  const updates = pathTraces.filter(layer => layer.classList.contains('is-revealed')).map(layer => {
+    const bounds = layer.getBoundingClientRect();
+    const seen = bounds.height ? Math.max(0, Math.min(1, (revealEdge - bounds.top) / bounds.height)) : 0;
+    return [layer, seen];
+  });
+  for (const [layer, seen] of updates) {
+    if (seen <= (traceProgress.get(layer) || 0)) continue;
+    traceProgress.set(layer, seen);
+    layer.style.setProperty('--path-seen', (seen * 110).toFixed(3) + '%');
+    if (layer === arcLayer && seen >= .97 && !endpointQueued) {
+      endpointQueued = true;
+      setTimeout(() => endpointLayer.classList.add('is-revealed'), 210);
+    }
+  }
+}
+function queuePathTraceUpdate() {
+  if (pathTraceFrame === undefined) pathTraceFrame = requestAnimationFrame(updatePathTraces);
+}
+window.addEventListener('scroll', queuePathTraceUpdate, { passive: true });
+window.addEventListener('resize', queuePathTraceUpdate);
+archiveMotion.addEventListener('change', queuePathTraceUpdate);
+queuePathTraceUpdate();
+
+const revealQueue = [];
+const delayedPathLayer = pathLayers[1];
+const precedingPathLayer = pathLayers[5];
+let delayedPathLayerReady = false;
+let precedingPathLayerFinished = false;
+let revealingLayers = false;
+async function revealPathLayers() {
+  if (revealingLayers) return;
+  revealingLayers = true;
+  try {
+    while (revealQueue.length) {
+      const layer = revealQueue.shift();
+      const image = layer.querySelector('img');
+      image.loading = 'eager';
+      await image.decode().catch(() => {});
+      layer.classList.add('is-revealed');
+      queuePathMilestones();
+      if (layer.classList.contains('path-trace')) queuePathTraceUpdate();
+      if (!archiveMotion.matches) {
+        await new Promise(resolve => setTimeout(resolve, 390));
+      }
+      if (layer === precedingPathLayer) {
+        precedingPathLayerFinished = true;
+        if (delayedPathLayerReady) revealQueue.unshift(delayedPathLayer);
+      }
+    }
+  } finally {
+    revealingLayers = false;
+  }
+}
+
+const layerObserver = new IntersectionObserver((entries, observer) => {
+  for (const { target, isIntersecting, boundingClientRect, rootBounds } of entries) {
+    if (!isIntersecting && (!rootBounds || boundingClientRect.top >= rootBounds.top ||
+        !document.documentElement.classList.contains('intake-browsing'))) continue;
+    if (target.pathLayer === endpointLayer && !archiveMotion.matches) {
+      observer.unobserve(target);
+      continue;
+    }
+    if (target.pathLayer === delayedPathLayer && !precedingPathLayerFinished) {
+      delayedPathLayerReady = true;
+    } else {
+      revealQueue.push(target.pathLayer);
+    }
+    observer.unobserve(target);
+  }
+  revealQueue.sort((left, right) => pathLayers.indexOf(left) - pathLayers.indexOf(right));
+  if (revealQueue.length) void revealPathLayers();
+}, { rootMargin: '0px 0px -7%' });
+
+pathArt.classList.add('is-reveal-ready');
+function addPathMarker(percent) {
+  const marker = document.createElement('span');
+  marker.style.cssText = 'position:absolute;left:50%;width:1px;height:1px;pointer-events:none;top:' + percent + '%';
+  pathArt.append(marker);
+  return marker;
+}
+for (const layer of pathLayers) {
+  if (layer === earthLayer) continue;
+  const marker = addPathMarker(layer.dataset.focus);
+  marker.pathLayer = layer;
+  layerObserver.observe(marker);
+}
+const voyagerImage = pathLayers[17].querySelector('img');
+const recordImage = pathLayers[13].querySelector('img');
+let activePathMilestone;
+let pathMilestoneFrame;
+
+function updatePathMilestones() {
+  pathMilestoneFrame = undefined;
+  const art = pathArt.getBoundingClientRect();
+  if (!art.height) return;
+  const height = window.innerHeight;
+  const remaining = pathScreen.getBoundingClientRect().bottom - height;
+  const travel = Math.max(1, remaining - art.top);
+  const focus = height > art.height * .4
+    ? 15 + Math.max(0, -art.top) / travel * 82
+    : (height * .5 - art.top) / art.height * 100;
+  let next = pathMilestones[0];
+  if (remaining <= Math.min(50, height * .08, travel * .06)) {
+    next = pathMilestones.at(-1);
+  } else {
+    for (const milestone of pathMilestones.slice(1, -1)) {
+      if (focus >= Number(milestone.dataset.focus) - 1.5) next = milestone;
+    }
+  }
+  if (next === pathMilestones[0] && !voyagerImage.closest('.path-layer').classList.contains('is-revealed')) return;
+  if (next === activePathMilestone) return;
+  activePathMilestone?.classList.remove('is-visible');
+  next.classList.add('is-visible');
+  activePathMilestone = next;
+  if (next === pathMilestones[1] && !archiveMotion.matches) {
+    recordImage.animate({ filter: ['brightness(1)', 'brightness(1.38)', 'brightness(1)'] }, {
+      duration: 850, easing: 'ease-in-out'
+    });
+  }
+}
+function queuePathMilestones() {
+  if (pathMilestoneFrame === undefined) pathMilestoneFrame = requestAnimationFrame(updatePathMilestones);
+}
+window.addEventListener('scroll', queuePathMilestones, { passive: true });
+window.addEventListener('resize', queuePathMilestones);
+queuePathMilestones();
+
+const orbitField = orbitCanvas.querySelector('#orbit-particles');
+const orbitFieldCanvas = orbitField.querySelector('canvas');
+const orbitContext = orbitFieldCanvas.getContext('2d');
+const orbitFieldTop = Number(orbitField.getAttribute('y'));
+const orbitFieldHeight = Number(orbitField.getAttribute('height'));
+
+const orbitCenter = { x: 1100, y: 4436 - orbitFieldTop };
+const orbitBodies = [
+  { name: 'moon', radius: 92, width: 704, height: 505, period: 37, phase: -1.40 },
+  { name: 'venus', radius: 40, width: 637, height: 544, period: 30, phase: -2.72 },
+  { name: 'mars', radius: 29, width: 779, height: 580, period: 46, phase: .68 },
+  { name: 'mercury', radius: 18, width: 575, height: 463, period: 25, phase: .27 },
+  { name: 'jupiter', radius: 25, width: 872, height: 655, period: 51, phase: 2.88 },
+  { name: 'saturn', radius: 20, width: 944, height: 693, period: 56, phase: .31 },
+  { name: 'uranus', radius: 18, width: 987, height: 727, period: 63, phase: -1.10 },
+  { name: 'neptune', radius: 19, width: 1017, height: 761, period: 68, phase: -2.05 },
+  { name: 'sun', radius: 16, width: 913, height: 704, period: 46, phase: 2.16 },
+];
+
+let planetRenderer;
+const planetFrames = new Map();
+function paintOrbitBody(ctx, body, x, y, time) {
+  let sprite = planetFrames.get(body.name);
+  const frame = Math.floor(time * 10);
+  if (!sprite) {
+    const canvas = document.createElement('canvas');
+    const padding = body.name === 'sun' ? 4.35
+      : body.name === 'saturn' ? 2.45 : body.name === 'uranus' ? 1.65 : 1.04;
+    const extent = Math.ceil(body.radius * padding);
+    canvas.width = canvas.height = extent * 2;
+    sprite = { canvas, ctx: canvas.getContext('2d'), extent, frame: -1 };
+    planetFrames.set(body.name, sprite);
+  }
+  if (sprite.frame !== frame) {
+    sprite.ctx.clearRect(0, 0, sprite.canvas.width, sprite.canvas.height);
+    planetRenderer.draw(sprite.ctx, body.name, sprite.extent, sprite.extent, body.radius, frame / 10);
+    sprite.frame = frame;
+  }
+  ctx.drawImage(sprite.canvas, x - sprite.extent, y - sprite.extent);
+}
+
+const showOrbitTrails = false;
+const particleSpacing = 9;
+const particleColumns = Math.floor(2200 / particleSpacing) + 3;
+const particleRows = Math.floor(orbitFieldHeight / particleSpacing) + 3;
+const orbitParticles = Array.from({ length: showOrbitTrails ? particleColumns * particleRows : 0 }, (_, index) => ({
+  x: (index % particleColumns - 1) * particleSpacing,
+  y: (Math.floor(index / particleColumns) - 1) * particleSpacing,
+  dx: 0, dy: 0, vx: 0, vy: 0, grain: .5 + .5 * Math.sin(index * 92.73),
+}));
+let recoveringParticles = new Set();
+
+let lastOrbitFrame;
+let orbitTime = 0;
+const centralEarth = { name: 'earth', radius: 343 };
+function paintOrbitTrails(ctx, sources, dt) {
+  const trails = [new Path2D(), new Path2D(), new Path2D(), new Path2D()];
+  const cover = new Set(recoveringParticles);
+  recoveringParticles = new Set();
+  for (const { x, y, radius } of sources) {
+    const reach = radius + particleSpacing * 2;
+    const firstColumn = Math.max(0, Math.floor((x - reach) / particleSpacing) + 1);
+    const lastColumn = Math.min(particleColumns - 1, Math.ceil((x + reach) / particleSpacing) + 1);
+    const firstRow = Math.max(0, Math.floor((y - reach) / particleSpacing) + 1);
+    const lastRow = Math.min(particleRows - 1, Math.ceil((y + reach) / particleSpacing) + 1);
+    for (let row = firstRow; row <= lastRow; row++) {
+      for (let column = firstColumn; column <= lastColumn; column++) {
+        cover.add(orbitParticles[row * particleColumns + column]);
+      }
+    }
+  }
+  const damping = .94 ** dt;
+  for (const particle of cover) {
+    const { x, y } = particle;
+    particle.vx = (particle.vx - particle.dx * .008 * dt) * damping;
+    particle.vy = (particle.vy - particle.dy * .008 * dt) * damping;
+    particle.dx += particle.vx * dt;
+    particle.dy += particle.vy * dt;
+    for (const source of sources) {
+      const dx = x + particle.dx - source.x;
+      const dy = y + particle.dy - source.y;
+      const clearance = source.radius + particleSpacing * .78;
+      const distanceSquared = dx * dx + dy * dy;
+      if (distanceSquared >= clearance * clearance) continue;
+      const distance = Math.sqrt(distanceSquared);
+      const pushX = distance > .001 ? dx / distance * (clearance - distance) : clearance;
+      const pushY = distance > .001 ? dy / distance * (clearance - distance) : 0;
+      particle.dx += pushX;
+      particle.dy += pushY;
+      particle.vx += pushX * .10;
+      particle.vy += pushY * .10;
+    }
+
+    const movement = Math.hypot(particle.dx, particle.dy);
+    if (movement > 1.5 && particle.grain > .14) {
+      const dotX = x + particle.dx;
+      const dotY = y + particle.dy;
+      const path = trails[Math.min(3, Math.floor(movement / 12))];
+      const size = .78 + particle.grain * 1.05;
+      path.moveTo(dotX + size, dotY);
+      path.arc(dotX, dotY, size, 0, Math.PI * 2);
+    }
+    if (Math.abs(particle.dx) + Math.abs(particle.dy) + Math.abs(particle.vx) + Math.abs(particle.vy) > .18) {
+      recoveringParticles.add(particle);
+    }
+  }
+  ctx.fillStyle = '#b6a36a';
+  trails.forEach((trail, index) => {
+    ctx.globalAlpha = [.27, .53, .79, 1][index];
+    ctx.fill(trail);
+  });
+  ctx.globalAlpha = 1;
+}
+
+function paintPlanetTrails() {
+  if (!orbitContext || !orbitCanvas.classList.contains('is-orbit-ready')) return;
+  planetRenderer ??= createPlanetParticleRenderer();
+  const now = performance.now();
+  const elapsed = Math.min(25, now - (lastOrbitFrame ?? now - 16.7));
+  const dt = archiveMotion.matches ? 0 : elapsed / 16.7;
+  lastOrbitFrame = now;
+  orbitTime += dt * 16.7 / 1000;
+
+  const sources = orbitBodies.map(body => {
+    const angle = body.phase + orbitTime * 2 * Math.PI / body.period;
+    return {
+      body,
+      x: orbitCenter.x + Math.cos(angle) * body.width,
+      y: orbitCenter.y + Math.sin(angle) * body.height,
+      radius: Math.max(17, body.radius),
+    };
+  });
+
+  const ctx = orbitContext;
+  ctx.setTransform(.5, 0, 0, .5, 0, 0);
+  ctx.clearRect(0, 0, 2200, orbitFieldHeight);
+  if (showOrbitTrails) paintOrbitTrails(ctx, sources, dt);
+
+  paintOrbitBody(ctx, centralEarth, orbitCenter.x, orbitCenter.y, orbitTime);
+  for (const { body, x, y } of sources) {
+    paintOrbitBody(ctx, body, x, y, orbitTime);
+  }
+}
+
+const pathMesh = pathArt.querySelector('.path-mesh');
+const meshContext = pathMesh.getContext('2d');
+const meshColumns = 22;
+const meshRows = 48;
+const meshPoints = Array.from({ length: meshColumns * meshRows }, (_, index) => ({
+  x: (index % meshColumns + .5) * pathMesh.width / meshColumns + 20 * Math.sin(index * 72.43),
+  y: (Math.floor(index / meshColumns) + .5) * pathMesh.height / meshRows + 20 * Math.cos(index * 47.31),
+  phase: index * 2.39996,
+  speed: .8 + .75 * (.5 + .5 * Math.sin(index * 27.4)),
+  neighbors: [],
+}));
+meshPoints.forEach((point, index) => {
+  const column = index % meshColumns;
+  const row = Math.floor(index / meshColumns);
+  for (let y = Math.max(0, row - 1); y <= Math.min(meshRows - 1, row + 1); y++) {
+    for (let x = Math.max(0, column - 1); x <= Math.min(meshColumns - 1, column + 1); x++) {
+      const neighbor = meshPoints[y * meshColumns + x];
+      if (neighbor !== point) point.neighbors.push(neighbor);
+    }
+  }
+  point.neighbors.sort((a, b) => Math.hypot(point.x - a.x, point.y - a.y)
+    - Math.hypot(point.x - b.x, point.y - b.y));
+  point.neighbors.length = Math.min(4, point.neighbors.length);
+});
+const meshEdges = [];
+const meshEdgeKeys = new Set();
+const meshPointIds = new Map(meshPoints.map((point, index) => [point, index]));
+meshPoints.forEach((point, index) => {
+  for (const neighbor of point.neighbors) {
+    const other = meshPointIds.get(neighbor);
+    const key = Math.min(index, other) * meshPoints.length + Math.max(index, other);
+    if (meshEdgeKeys.has(key)) continue;
+    meshEdgeKeys.add(key);
+    meshEdges.push([point, neighbor]);
+  }
+});
+
+const meshBaseline = document.createElement('canvas');
+meshBaseline.width = pathMesh.width;
+meshBaseline.height = pathMesh.height;
+const meshBaselineContext = meshBaseline.getContext('2d');
+let meshPointer;
+let meshFrame;
+let meshDirty;
+
+function paintMesh(context, region) {
+  const lines = Array.from({ length: 5 }, () => new Path2D());
+  const dots = Array.from({ length: 5 }, () => new Path2D());
+  const [left, top, width, height] = region;
+  const right = left + width;
+  const bottom = top + height;
+  for (const [point, neighbor] of meshEdges) {
+    const x = point.liveX ?? point.x;
+    const y = point.liveY ?? point.y;
+    const nx = neighbor.liveX ?? neighbor.x;
+    const ny = neighbor.liveY ?? neighbor.y;
+    if (Math.max(x, nx) < left || Math.min(x, nx) > right ||
+        Math.max(y, ny) < top || Math.min(y, ny) > bottom) continue;
+    const distance = Math.hypot(x - nx, y - ny);
+    const light = Math.max(point.light ?? 0, neighbor.light ?? 0);
+    const strength = light * Math.max(.25, 1 - distance / 125);
+    const path = lines[Math.min(4, Math.floor(strength * 7))];
+    path.moveTo(x, y);
+    path.lineTo(nx, ny);
+  }
+  for (const point of meshPoints) {
+    const x = point.liveX ?? point.x;
+    const y = point.liveY ?? point.y;
+    if (x < left - 2 || x > right + 2 || y < top - 2 || y > bottom + 2) continue;
+    const light = point.light ?? 0;
+    const path = dots[Math.min(4, Math.floor(light * 5))];
+    const size = .85 + light * .52;
+    path.moveTo(x + size, y);
+    path.arc(x, y, size, 0, Math.PI * 2);
+  }
+  context.lineWidth = .78;
+  lines.forEach((path, index) => {
+    context.strokeStyle = 'rgba(183,164,116,' + [.12, .17, .23, .29, .35][index] + ')';
+    context.stroke(path);
+  });
+  dots.forEach((path, index) => {
+    context.fillStyle = 'rgba(204,184,134,' + [.20, .25, .31, .38, .48][index] + ')';
+    context.fill(path);
+  });
+}
+
+if (meshContext && meshBaselineContext) {
+  paintMesh(meshBaselineContext, [0, 0, pathMesh.width, pathMesh.height]);
+  meshContext.drawImage(meshBaseline, 0, 0);
+}
+
+function drawPathMesh(timestamp) {
+  meshFrame = undefined;
+  if (!meshContext || !meshBaselineContext) return;
+  const ctx = meshContext;
+  if (meshDirty) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'copy';
+    ctx.beginPath();
+    ctx.rect(...meshDirty);
+    ctx.clip();
+    ctx.drawImage(meshBaseline, 0, 0);
+    ctx.restore();
+    meshDirty = undefined;
+  }
+  if (!meshPointer) return;
+  const bounds = pathMesh.getBoundingClientRect();
+  if (!bounds.width || !bounds.height || meshPointer.x < bounds.left || meshPointer.x > bounds.right
+      || meshPointer.y < bounds.top || meshPointer.y > bounds.bottom) return;
+
+  const x = (meshPointer.x - bounds.left) * pathMesh.width / bounds.width;
+  const y = (meshPointer.y - bounds.top) * pathMesh.height / bounds.height;
+  const time = timestamp / 1000;
+  const reduced = archiveMotion.matches;
+  for (const point of meshPoints) {
+    const proximity = Math.max(0, 1 - Math.hypot(point.x - x, point.y - y) / 178);
+    const response = proximity * proximity * (3 - 2 * proximity);
+    const phase = time * point.speed + point.phase;
+    point.liveX = point.x + (reduced ? 0 : response * (Math.sin(phase) * 25 + Math.sin(phase * .51) * 9));
+    point.liveY = point.y + (reduced ? 0 : response * (Math.cos(phase * .93) * 24 + Math.cos(phase * .42) * 8));
+    point.light = response;
+  }
+
+  meshDirty = [x - 320, y - 320, 640, 640];
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(...meshDirty);
+  ctx.clip();
+  ctx.clearRect(...meshDirty);
+  paintMesh(ctx, meshDirty);
+  ctx.restore();
+  if (!reduced) queuePathMesh();
+}
+
+function queuePathMesh() {
+  if (meshFrame === undefined) meshFrame = requestAnimationFrame(drawPathMesh);
+}
+function clearPathMeshPointer() {
+  meshPointer = undefined;
+  queuePathMesh();
+}
+window.addEventListener('pointermove', event => {
+  if (event.pointerType === 'touch') return;
+  meshPointer = { x: event.clientX, y: event.clientY };
+  queuePathMesh();
+}, { passive: true });
+pathScreen.addEventListener('pointerleave', clearPathMeshPointer);
+window.addEventListener('pointerout', event => {
+  if (event.pointerType !== 'touch' && !event.relatedTarget) clearPathMeshPointer();
+});
+window.addEventListener('blur', clearPathMeshPointer);
+window.addEventListener('scroll', () => {
+  if (meshPointer) queuePathMesh();
+}, { passive: true });
+
+// Motion adapted from Mouse Orbit by isuttell (https://codepen.io/isuttell/pen/raxRaJ).
+const mouseOrbit = pathArt.querySelector('.path-mouse-orbit');
+const mouseOrbitContext = mouseOrbit.getContext('2d');
+const earthHitArea = orbitCanvas.querySelector('.earth-entry circle');
+const fullTurn = Math.PI * 2;
+let mouseOrbitParticles = [];
+let mouseOrbitFrame;
+let mouseOrbitWidth = 0;
+let mouseOrbitHeight = 0;
+let earthHasFocus = false;
+const maxMouseOrbitSize = 5;
+
+function paintMouseOrbit(timestamp) {
+  const ctx = mouseOrbitContext;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  if (width !== mouseOrbitWidth || height !== mouseOrbitHeight || !mouseOrbitParticles.length) {
+    const density = Math.min(window.devicePixelRatio || 1, 2);
+    mouseOrbitWidth = width;
+    mouseOrbitHeight = height;
+    mouseOrbit.width = Math.round(width * density);
+    mouseOrbit.height = Math.round(height * density);
+    ctx.setTransform(density, 0, 0, density, 0, 0);
+    const spawnRadius = Math.hypot(width, height) / 2 + 80;
+    mouseOrbitParticles = Array.from({ length: 25 }, (_, index) => {
+      const angle = (index + 1) * fullTurn / 25;
+      const homeX = width / 2 + Math.cos(angle) * spawnRadius;
+      const homeY = height / 2 + Math.sin(angle) * spawnRadius;
+      const shade = Math.round(28 + Math.random() * 22);
+      return {
+        x: homeX, y: homeY, homeX, homeY,
+        angle, speed: .01 + Math.random() * .04, radius: 3 + Math.random() * 3,
+        size: 1 + Math.random() * maxMouseOrbitSize, targetSize: maxMouseOrbitSize,
+        color: [255, shade, shade + 7].join(','),
+      };
+    });
+  }
+
+  const pointer = meshPointer;
+  let earthTarget;
+  let earthRadius = 0;
+  if (meshPointer && orbitCanvas.classList.contains('is-orbit-ready')) {
+    const earth = earthHitArea.getBoundingClientRect();
+    const center = { x: earth.left + earth.width / 2, y: earth.top + earth.height / 2 };
+    const margin = earthHasFocus ? 118 : 100;
+    earthHasFocus = Math.hypot(pointer.x - center.x, pointer.y - center.y) < earth.width / 2 + margin;
+    if (earthHasFocus) {
+      earthTarget = center;
+      earthRadius = earth.width / 2;
+    }
+  } else {
+    earthHasFocus = false;
+  }
+
+  // Fade just the trails so the canvas can sit over the existing artwork.
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.globalAlpha = .19;
+  ctx.fillRect(0, 0, width, height);
+  ctx.lineCap = 'round';
+  for (const particle of mouseOrbitParticles) {
+    const targetX = (earthTarget ?? pointer)?.x ?? particle.homeX;
+    const targetY = (earthTarget ?? pointer)?.y ?? particle.homeY;
+    const ringAngle = particle.angle + timestamp * .00055;
+    const ringRadius = earthHasFocus ? earthRadius + particle.radius * 1.5 : 0;
+    const ringEase = Math.max(.07, particle.speed * 2);
+    const ringStepX = (targetX + Math.cos(ringAngle) * ringRadius - particle.x) * ringEase;
+    const ringStepY = (targetY + Math.sin(ringAngle) * ringRadius - particle.y) * ringEase;
+    const cursorDistance = pointer ? Math.hypot(particle.x - pointer.x, particle.y - pointer.y) : Infinity;
+    const approach = Math.max(0, Math.min(1, (92 - cursorDistance) / 48));
+    const settle = earthHasFocus ? 1 : approach * approach * (3 - 2 * approach);
+    const flightAngle = particle.angle * 2 + timestamp * particle.speed / 16.7;
+    const flightRadius = pointer ? particle.radius * .33 : 0;
+    const flightSpeed = pointer
+      ? Math.max(particle.speed, cursorDistance < 160 ? .027 : 0)
+      : .035 + particle.speed;
+    const flightStepX = (targetX - particle.x) * flightSpeed + Math.cos(flightAngle) * flightRadius;
+    const flightStepY = (targetY - particle.y) * flightSpeed + Math.sin(flightAngle) * flightRadius;
+    particle.x += flightStepX * (1 - settle) + ringStepX * settle;
+    particle.y += flightStepY * (1 - settle) + ringStepY * settle;
+    particle.size += (particle.targetSize - particle.size) * .03;
+    if (Math.round(particle.size) === Math.round(particle.targetSize)) {
+      particle.targetSize = 1 + Math.random() * maxMouseOrbitSize;
+    }
+
+    ctx.globalAlpha = .42;
+    ctx.globalCompositeOperation = 'lighten';
+    ctx.fillStyle = 'rgb(' + particle.color + ')';
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, particle.size, 0, fullTurn);
+    ctx.fill();
+
+    const linkDistance = earthHasFocus ? 100 : 38;
+    ctx.globalAlpha = .11;
+    ctx.globalCompositeOperation = 'screen';
+    for (const neighbor of mouseOrbitParticles) {
+      const distance = Math.hypot(particle.x - neighbor.x, particle.y - neighbor.y);
+      if (neighbor === particle || distance >= linkDistance) continue;
+      const outerDistance = pointer ? Math.max(cursorDistance, Math.hypot(neighbor.x - pointer.x, neighbor.y - pointer.y)) : Infinity;
+      const visibility = earthHasFocus ? 1 : Math.max(0, Math.min(1, (outerDistance - 24) / 18));
+      if (!visibility) continue;
+      const strength = (1 - distance / linkDistance) * visibility;
+      ctx.lineWidth = particle.size * 2 * strength;
+      ctx.strokeStyle = 'rgba(' + particle.color + ',' + strength + ')';
+      ctx.beginPath();
+      ctx.moveTo(particle.x, particle.y);
+      ctx.lineTo(neighbor.x, neighbor.y);
+      ctx.stroke();
+    }
+  }
+  mouseOrbitFrame = requestAnimationFrame(paintMouseOrbit);
+}
+
+function syncMouseOrbit() {
+  const active = mouseOrbitContext && !archiveMotion.matches && !document.hidden
+    && pathScreen.getClientRects().length > 0;
+  if (active && mouseOrbitFrame === undefined) {
+    mouseOrbitFrame = requestAnimationFrame(paintMouseOrbit);
+  } else if (!active && mouseOrbitFrame !== undefined) {
+    cancelAnimationFrame(mouseOrbitFrame);
+    mouseOrbitFrame = undefined;
+    mouseOrbitParticles = [];
+    mouseOrbitContext.clearRect(0, 0, mouseOrbitWidth, mouseOrbitHeight);
+  }
+}
+syncMouseOrbit();
+document.addEventListener('visibilitychange', syncMouseOrbit);
+archiveMotion.addEventListener('change', syncMouseOrbit);
+
+let planetTrailFrame;
+function animatePlanetTrails() {
+  paintPlanetTrails();
+  planetTrailFrame = requestAnimationFrame(animatePlanetTrails);
+}
+
+let orbitsVisible = false;
+function syncPathOrbits() {
+  const moving = orbitsVisible && orbitCanvas.classList.contains('is-orbit-ready') &&
+    !archiveMotion.matches && !document.hidden;
+  if (moving) {
+    if (planetTrailFrame === undefined) animatePlanetTrails();
+  } else {
+    lastOrbitFrame = undefined;
+    cancelAnimationFrame(planetTrailFrame);
+    planetTrailFrame = undefined;
+    if (orbitsVisible) paintPlanetTrails();
+  }
+}
+syncPathOrbits();
+const orbitTrigger = addPathMarker(75);
+orbitTrigger.style.height = '25%';
+new IntersectionObserver(([entry]) => {
+  orbitsVisible = entry.isIntersecting;
+  if (orbitsVisible) {
+    earthLayer.classList.add('is-revealed');
+    orbitCanvas.classList.add('is-orbit-ready');
+  }
+  syncPathOrbits();
+}, { rootMargin: '420px 0px' }).observe(orbitTrigger);
+archiveMotion.addEventListener('change', syncPathOrbits);
+document.addEventListener('visibilitychange', syncPathOrbits);
+
+const earthHomepage = document.querySelector('#homepage');
+const earthPortrait = earthHomepage.querySelector('.homepage-frame');
+const portraitFrame = earthPortrait.parentElement;
+const alteredPortrait = portraitFrame.querySelector('.homepage-frame-hover');
+const returnPortraits = [...portraitFrame.querySelectorAll('.homepage-return')];
+const portraitMaskSteps = 10;
+const portraitMasks = new Map();
+let portraitProgress = 0;
+let portraitFrameRequest;
+let portraitLastTick;
+
+function getPortraitMasks(side, step) {
+  const key = side + step;
+  if (portraitMasks.has(key)) return portraitMasks.get(key);
+  const mask = document.createElement('canvas');
+  mask.width = 512;
+  mask.height = 580;
+  const ctx = mask.getContext('2d');
+  const xStart = side === 'right' ? mask.width / 2 : 0;
+  const xEnd = side === 'both' ? mask.width : xStart + mask.width / 2;
+  const pixels = ctx.createImageData(mask.width, mask.height);
+  for (let y = 0; y < mask.height; y++) {
+    for (let x = xStart; x < xEnd; x++) {
+      const noise = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+      const grain = noise - Math.floor(noise);
+      const across = side === 'left' ? x - xStart : xEnd - x;
+      const threshold = side === 'both' ? grain * .62 + y / mask.height * .38
+        : grain * .75 + across / (mask.width / 2) * .25;
+      if (threshold < step / portraitMaskSteps) pixels.data[(y * mask.width + x) * 4 + 3] = 255;
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
+  const incoming = 'url(' + mask.toDataURL() + ')';
+  if (side === 'both') {
+    const pair = { incoming };
+    portraitMasks.set(key, pair);
+    return pair;
+  }
+  ctx.fillStyle = '#fff';
+  ctx.globalCompositeOperation = 'xor';
+  ctx.fillRect(0, 0, mask.width, mask.height);
+  const outgoing = 'url(' + mask.toDataURL() + ')';
+  const pair = { incoming, outgoing };
+  portraitMasks.set(key, pair);
+  return pair;
+}
+
+function animatePortraitSwap(timestamp) {
+  portraitFrameRequest = undefined;
+  if (portraitFrame.dataset.carving) return;
+  const hovered = returnPortraits.find(link => link.matches(':hover')) ??
+    returnPortraits.find(link => link.matches(':focus-visible'));
+  const requested = hovered ? (hovered.classList.contains('homepage-return-right') ? 'right' : 'left') : '';
+  const current = portraitFrame.dataset.effect;
+  const side = portraitProgress > 0 ? current : requested;
+  const target = requested && side === requested && alteredPortrait.naturalWidth ? 1 : 0;
+  const delta = Math.min(48, timestamp - (portraitLastTick ?? timestamp - 16)) / 245;
+  portraitLastTick = timestamp;
+  portraitProgress = archiveMotion.matches ? target
+    : target > portraitProgress ? Math.min(target, portraitProgress + delta) : Math.max(target, portraitProgress - delta);
+
+  if (portraitProgress > 0) {
+    portraitFrame.dataset.effect = side;
+    const masks = getPortraitMasks(side, Math.ceil(portraitProgress * portraitMaskSteps));
+    alteredPortrait.style.maskImage = masks.incoming;
+    earthPortrait.style.maskImage = masks.outgoing;
+  } else {
+    delete portraitFrame.dataset.effect;
+    alteredPortrait.style.removeProperty('mask-image');
+    earthPortrait.style.removeProperty('mask-image');
+  }
+  if (portraitProgress !== target || (requested && side !== requested)) queuePortraitSwap();
+  else portraitLastTick = undefined;
+}
+function queuePortraitSwap() {
+  if (portraitFrameRequest === undefined) portraitFrameRequest = requestAnimationFrame(animatePortraitSwap);
+}
+for (const link of returnPortraits) {
+  for (const event of ['pointerenter', 'pointerleave', 'focus', 'blur']) {
+    link.addEventListener(event, queuePortraitSwap);
+  }
+}
+alteredPortrait.addEventListener('load', queuePortraitSwap);
+
+async function carveHomepagePortraits() {
+  portraitFrame.dataset.carving = 'waiting';
+  portraitProgress = 0;
+  portraitLastTick = undefined;
+  delete portraitFrame.dataset.effect;
+  alteredPortrait.style.removeProperty('mask-image');
+  earthPortrait.style.removeProperty('mask-image');
+
+  const finish = () => {
+    delete portraitFrame.dataset.carving;
+    earthPortrait.style.removeProperty('mask-image');
+    queuePortraitSwap();
+  };
+  if (archiveMotion.matches) {
+    finish();
+    return;
+  }
+
+  await earthPortrait.decode().catch(() => {});
+  if (portraitFrame.dataset.carving !== 'waiting') return;
+  let start;
+  let lastStep;
+  function paint(timestamp) {
+    if (!earthHomepage.offsetHeight || archiveMotion.matches) {
+      finish();
+      return;
+    }
+    start ??= timestamp;
+    const progress = (timestamp - start) / 790;
+    if (progress >= 1) {
+      finish();
+      return;
+    }
+    const step = Math.min(portraitMaskSteps - 1, Math.floor(progress * portraitMaskSteps) + 1);
+    if (step !== lastStep) {
+      earthPortrait.style.maskImage = getPortraitMasks('both', step).incoming;
+      portraitFrame.dataset.carving = 'drawing';
+      lastStep = step;
+    }
+    requestAnimationFrame(paint);
+  }
+  requestAnimationFrame(paint);
+}
+
+const homepageArrivals = [...earthHomepage.querySelectorAll('.homepage-detail,.homepage-figure')]
+  .sort((left, right) => parseFloat(left.style.getPropertyValue('--home-y'))
+    - parseFloat(right.style.getPropertyValue('--home-y')));
+const homepageVideo = earthHomepage.querySelector('.homepage-video');
+let homepageArrivalFrame;
+function updateHomepageArrivals() {
+  homepageArrivalFrame = undefined;
+  if (!earthHomepage.offsetHeight) return;
+  const top = earthHomepage.getBoundingClientRect().top;
+  const started = top < -Math.min(85, innerHeight * .11);
+  const departing = homepageVideo.offsetTop + top < innerHeight * .67;
+  homepageArrivals.forEach(element => {
+    const arrived = started && !departing && element.offsetTop + top < innerHeight * .90;
+    element.classList.toggle('homepage-arrived', arrived);
+    element.classList.toggle('homepage-departed', departing);
+  });
+}
+function queueHomepageArrivals() {
+  if (homepageArrivalFrame === undefined) homepageArrivalFrame = requestAnimationFrame(updateHomepageArrivals);
+}
+homepageArrivals.forEach((element, index) => element.style.setProperty('--home-beat', index * 32 + 'ms'));
+window.addEventListener('scroll', queueHomepageArrivals, { passive:true });
+window.addEventListener('resize', queueHomepageArrivals);
+queueHomepageArrivals();
+
+let earthTransition;
+let voyagerReturnScroll;
+
+function showEarthHomepage() {
+  void carveHomepagePortraits();
+  document.documentElement.classList.remove('voyager-entry');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  queueHomepageArrivals();
+  syncMouseOrbit();
+  syncPathOrbits();
+}
+
+earthHitArea.closest('a').addEventListener('click', async event => {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey ||
+      event.shiftKey || event.altKey || archiveMotion.matches || typeof Element.prototype.animate !== 'function') return;
+  event.preventDefault();
+  if (earthTransition) return;
+
+  const bounds = earthHitArea.getBoundingClientRect();
+  const x = bounds.left + bounds.width / 2;
+  const y = bounds.top + bounds.height / 2;
+  const radius = Math.max(1, bounds.width / 2);
+  const cover = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const destination = event.currentTarget.href.baseVal;
+  voyagerReturnScroll = window.scrollY;
+  const portraitReady = earthPortrait.decode().catch(() => {});
+
+  const overlay = document.createElement('div');
+  overlay.className = 'earth-transition';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.setProperty('--earth-x', x + 'px');
+  overlay.style.setProperty('--earth-y', y + 'px');
+  overlay.style.setProperty('--earth-size', radius * 2 + 'px');
+  const dim = document.createElement('div');
+  dim.className = 'earth-transition-dim';
+  const disc = document.createElement('div');
+  disc.className = 'earth-transition-disc';
+  overlay.append(dim, disc);
+  document.body.append(overlay);
+  earthTransition = overlay;
+  const oldOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  try {
+    dim.animate({ opacity: [0, 1] }, { duration: 460, easing: 'ease-out', fill: 'forwards' });
+    await disc.animate({ opacity: [0, 1] }, {
+      delay: 100, duration: 380, easing: 'ease-out', fill: 'forwards'
+    }).finished;
+    await disc.animate([
+      { transform: 'translate(-50%,-50%) scale(1)' },
+      { transform: 'translate(-50%,-50%) scale(' + ((cover + 12) / radius) + ')' }
+    ], { duration: 780, easing: 'cubic-bezier(.55,.05,.19,1)', fill: 'forwards' }).finished;
+    await portraitReady;
+    history.pushState(history.state, '', destination);
+    showEarthHomepage();
+  } catch {
+    window.location.assign(destination);
+  } finally {
+    overlay.remove();
+    document.body.style.overflow = oldOverflow;
+    earthTransition = undefined;
+  }
+});
+
+function showVoyagerEnd() {
+  document.documentElement.classList.add('voyager-entry');
+  window.scrollTo({ top: pathScreen.offsetTop + pathScreen.offsetHeight - innerHeight, behavior: 'instant' });
+  syncMouseOrbit();
+  syncPathOrbits();
+}
+
+for (const link of earthHomepage.querySelectorAll('.homepage-return')) {
+  link.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey ||
+        event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    voyagerReturnScroll ??= 0;
+    history.pushState(history.state, '', link.href);
+    showVoyagerEnd();
+  });
+}
+
+window.addEventListener('popstate', () => {
+  if (location.hash === '#voyager-end' && !currentArchive) {
+    showVoyagerEnd();
+    return;
+  }
+  if (voyagerReturnScroll === undefined) return;
+  const query = new URLSearchParams(location.search);
+  if (query.get('page') === 'earth') {
+    if (document.documentElement.classList.contains('voyager-entry')) showEarthHomepage();
+  } else {
+    if (currentArchive) {
+      window.location.reload();
+      return;
+    }
+    document.documentElement.classList.add('voyager-entry');
+    window.scrollTo({ top: voyagerReturnScroll, behavior: 'instant' });
+    syncMouseOrbit();
+    syncPathOrbits();
+  }
+});
+
+function showLanding(scrollToIntake = false) {
+  if (scrollToIntake) document.documentElement.classList.remove('voyager-entry');
+  document.documentElement.classList.add('intake-browsing');
+  if (scrollToIntake) intakeScreen.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+
 function showIntake() {
   currentArchive = 0;
   archiveDock.dataset.archive = '0';
@@ -2533,6 +3606,7 @@ function showIntake() {
 
 async function enterArchiveFromIntake(number, ball, ghost, point, mouth) {
   setIntakeInformation(false);
+  intakeScreen.scrollIntoView({ block: 'start', behavior: 'instant' });
   const root = document.documentElement;
   let grid;
   try {
@@ -2547,6 +3621,8 @@ async function enterArchiveFromIntake(number, ball, ghost, point, mouth) {
     ball.remove();
     intakeScreen.inert = true;
     root.classList.add('dock-shared-scene', 'intake-crossing');
+    root.classList.remove('intake-browsing');
+    window.scrollTo({ top: 0, behavior: 'instant' });
     document.body.classList.add('dock-exchanging');
     stage.inert = false;
     armBall(undefined);
@@ -2616,6 +3692,7 @@ async function returnToIntake() {
     intakeScreen.inert = false;
     root.classList.remove('dock-shared-scene', 'intake-crossing');
     document.body.classList.remove('dock-exchanging');
+    showLanding(true);
     archiveTransition = false;
   }
 }
@@ -2688,6 +3765,12 @@ if (startOnIntake) {
   archiveMouth.textContent = '';
   armBall(undefined);
   intakeScreen.inert = false;
+  showLanding(dockMotionQuery.has('home'));
+  if (startOnVoyager && location.hash === '#voyager-end') showVoyagerEnd();
+  else if (!dockMotionQuery.has('home')) window.scrollTo({ top: 0, behavior: 'instant' });
+  if (!startOnVoyager && !dockMotionQuery.has('home')) void carveHomepagePortraits();
+  else delete portraitFrame.dataset.carving;
+  document.title = 'Human Approximately';
   document.documentElement.classList.remove('dock-pending', 'intake-boot');
   document.querySelector('#dock-load-preview')?.remove();
   requestAnimationFrame(animateHeadings);
